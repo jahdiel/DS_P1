@@ -12,8 +12,8 @@ public interface DiskUnitInterface {
 	 * (for example, if b is null, or if that block instance does not match the block size of the current disk instance).
 	 * @param blockNum number of blocks in the disk unit
 	 * @param b VirtualDiskBlock object
-	 * @throws InvalidBlockNumberException
-	 * @throws InvalidBlockException
+	 * @throws InvalidBlockNumberException thrown when block number is not within the accepted range
+	 * @throws InvalidBlockException thrown when a blocks properties are not valid
 	 */
 	public void write(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException;
 	/**
@@ -23,8 +23,8 @@ public interface DiskUnitInterface {
 	 * shall be overwritten by the content of the disk block to be read. The announced exceptions are thrown as described for the write operation.
 	 * @param blockNum number of blocks in the disk unit
 	 * @param b VirtualDiskBlock object
-	 * @throws InvalidBlockNumberException
-	 * @throws InvalidBlockException
+	 * @throws InvalidBlockNumberException thrown when block number is not within the accepted range
+	 * @throws InvalidBlockException thrown when a blocks properties are not valid
 	 */
 	public void read(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException; 
 	/**

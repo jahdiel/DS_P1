@@ -4,7 +4,7 @@ import diskUtilities.*;
 public class DiskUnitTester1 {
 
 	/**
-	 * @param args
+	 * @param args systems argument
 	 */
 	public static void main(String[] args) {
 		DiskUnit d = DiskUnit.mount("disk1"); // edit the name of the disk to mount

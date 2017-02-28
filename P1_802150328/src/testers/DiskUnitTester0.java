@@ -4,7 +4,7 @@ import diskUtilities.*;
 public class DiskUnitTester0 {
 
 	/**
-	 * @param args
+	 * @param args Systems argument
 	 */
 	public static void main(String[] args) {
 		DiskUnit.createDiskUnit("disk1", 256, 16);
