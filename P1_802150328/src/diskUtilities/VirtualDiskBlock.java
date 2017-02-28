@@ -1,4 +1,4 @@
-package src;
+package diskUtilities;
 
 import diskUnitExceptions.*;
 
@@ -18,7 +18,7 @@ public class VirtualDiskBlock {
 	}
 	/**
 	 * Creates a block of size (number of bytes) equal to blockCapacity.
-	 * @param blockCapacity
+	 * @param blockCapacity size of virtual disk block
 	 */
 	public VirtualDiskBlock(int blockCapacity) {
 		if (blockCapacity < 8)
@@ -40,8 +40,8 @@ public class VirtualDiskBlock {
 	 * Changes the content of element at position index to that of nuevo 
 	 * in the current disk block instance. It is assumed that 
 	 * index is valid for the current disk block instance. 
-	 * @param index
-	 * @param nuevo
+	 * @param index index of elements array
+	 * @param nuevo new value to set in the index position
 	 */
 	public void setElement(int index, byte nuevo) throws InvalidVirtualDiskBlockIndexException {
 		if (index < 0 || index > elements.length) {
@@ -54,8 +54,8 @@ public class VirtualDiskBlock {
 	 * Returns a copy of the character at the position index 
 	 * in the current block instance. It is assumed that
 	 * index is valid for the current disk block instance.
-	 * @param index
-	 * @return
+	 * @param index index of elements array
+	 * @return element in the position index
 	 */
 	public byte getElement(int index) throws InvalidVirtualDiskBlockIndexException {
 		if (index < 0 || index > elements.length) {

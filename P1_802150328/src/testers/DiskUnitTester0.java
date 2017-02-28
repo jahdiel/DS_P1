@@ -1,5 +1,5 @@
 package testers;
-import src.*;
+import diskUtilities.*;
 
 public class DiskUnitTester0 {
 
@@ -19,7 +19,7 @@ public class DiskUnitTester0 {
 		String s = "You can modify the testers to make them more user-friendly. The " +
 				"current versions of tester 1 and of tester 2 require some minor editing in" +
 				" order to use it on a particular disk wanted. Just edit (inside the main method) " +
-				"the line that ¨mounts¨ the particular disk that you want to use. Remember that " +
+				"the line that   mounts   the particular disk that you want to use. Remember that " +
 				"tester 0 only creates the six disks mentioned above. Again, you can modify to " +
 				"create others or to make those testers easier to use. You should run tester 1 " +
 				"on a particular disk unit before running the tester 2 on that same unit. " +

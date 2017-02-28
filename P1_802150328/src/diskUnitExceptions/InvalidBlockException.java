@@ -1,7 +1,9 @@
 package diskUnitExceptions;
 
 public class InvalidBlockException extends RuntimeException {
-	
+	/**
+	 * Exception thrown when a blocks properties are not valid.
+	 */
 	public InvalidBlockException() {}
 	
 	public InvalidBlockException(String arg0) {

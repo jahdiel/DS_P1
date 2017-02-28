@@ -1,4 +1,4 @@
-package src;
+package diskUtilities;
 import diskUnitExceptions.*;
 
 public interface DiskUnitInterface {
@@ -10,35 +10,35 @@ public interface DiskUnitInterface {
 	 * The first exception is thrown whenever the block number received is not valid for the current disk instance. 
 	 * The second exception is thrown whenever b does not represent a valid disk block for the current disk instance 
 	 * (for example, if b is null, or if that block instance does not match the block size of the current disk instance).
-	 * @param blockNum
-	 * @param b
+	 * @param blockNum number of blocks in the disk unit
+	 * @param b VirtualDiskBlock object
 	 * @throws InvalidBlockNumberException
 	 * @throws InvalidBlockException
 	 */
 	public void write(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException;
 	/**
-	 * Reads a given block from the disk. The content of the specified disk block (identified by its number – blockNum) is copied 
+	 * Reads a given block from the disk. The content of the specified disk block (identified by its number ï¿½ blockNum) is copied 
 	 * as the new content of the current instance of block being referenced by parameter b. 
 	 * Notice that b must reference an existing instance of VirtualDiskBlock, and that the current content of that instance 
 	 * shall be overwritten by the content of the disk block to be read. The announced exceptions are thrown as described for the write operation.
-	 * @param blockNum
-	 * @param b
+	 * @param blockNum number of blocks in the disk unit
+	 * @param b VirtualDiskBlock object
 	 * @throws InvalidBlockNumberException
 	 * @throws InvalidBlockException
 	 */
 	public void read(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException; 
 	/**
 	 * Returns a nonnegative integer value corresponding to the number of valid blocks (unused + used) that the current disk instance has.
-	 * @return
+	 * @return Nonnegative integer value corresponding to the number of valid blocks that the current disk instance has.
 	 */
 	public int getCapacity();
 	/**
 	 * Returns a nonnegative integer value which corresponds to the size (number of character elements) of a block in the current disk instance.
-	 * @return
+	 * @return Nonnegative integer value which corresponds to the size of a block in the current disk instance.
 	 */
 	public int getBlockSize();
 	/**
-	 * Formats the disk. This operation visits every “physical block” in the disk and fills with zeroes all those that are valid.
+	 * Formats the disk. This operation visits every ï¿½physical blockï¿½ in the disk and fills with zeroes all those that are valid.
 	 */
 	public void lowLevelFormat();
 	/**

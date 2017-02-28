@@ -1,4 +1,4 @@
-package src;
+package diskUtilities;
 import diskUnitExceptions.*;
 
 import java.io.*;
@@ -37,7 +37,7 @@ public class DiskUnit implements DiskUnitInterface{
 	 * @param name the name of the disk unit to activate
 	 * @return the corresponding DiskUnit object
 	 * @throws NonExistingDiskException whenever no
-	 *    ¨disk¨ with the specified name is found.
+	 *    "disk" with the specified name is found.
 	*/
 	public static DiskUnit mount(String name) throws NonExistingDiskException {
 		File file=new File(name);
@@ -149,16 +149,21 @@ public class DiskUnit implements DiskUnitInterface{
 	@Override
 	public void write(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException {
 		
-		if (blockNum < 0 || blockNum > capacity)
-			throw new InvalidBlockNumberException("The block number "+blockNum+" is invalid.");
-		if (b == null || b.getCapacity() > blockSize)
-			throw new InvalidBlockException("Invalid block instance.");
-		
-		int bytePos = blockNum * blockSize;
 		try {
+			if (blockNum < 1 || blockNum > capacity)
+				throw new InvalidBlockNumberException("The block number "+blockNum+" is invalid.");
+			if (b == null || b.getCapacity() > blockSize)
+				throw new InvalidBlockException("Invalid block instance.");
+			
+			int bytePos = blockNum * blockSize;
 			disk.seek(bytePos);
 			for (int i=0; i < b.getCapacity(); i++)
 				disk.write(b.getElement(i));
+			
+		} catch (InvalidBlockNumberException e) {
+			e.printStackTrace();
+		} catch (InvalidBlockException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 	
@@ -168,16 +173,21 @@ public class DiskUnit implements DiskUnitInterface{
 	@Override
 	public void read(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException {
 		
-		if (blockNum < 0 || blockNum > capacity)
-			throw new InvalidBlockNumberException("The block number "+blockNum+" is invalid.");
-		if (b == null || b.getCapacity() > blockSize)
-			throw new InvalidBlockException("Invalid block instance.");
-		
-		int bytePos = blockNum * blockSize;
 		try {
+			if (blockNum < 0 || blockNum > capacity)
+				throw new InvalidBlockNumberException("The block number "+blockNum+" is invalid.");
+			if (b == null || b.getCapacity() > blockSize)
+				throw new InvalidBlockException("Invalid block instance.");
+			
+			int bytePos = blockNum * blockSize;
 			disk.seek(bytePos);
 			for (int i=0; i < b.getCapacity(); i++)
 				b.setElement(i, disk.readByte());
+			
+		} catch (InvalidBlockNumberException e) {
+			e.printStackTrace();
+		} catch (InvalidBlockException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 	
@@ -208,7 +218,14 @@ public class DiskUnit implements DiskUnitInterface{
 
 	@Override
 	public void lowLevelFormat() {
-		// TODO Auto-generated method stub
+		
+		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
+		for (int i=0; i<vdb.getCapacity(); i++) {
+			vdb.setElement(i, (byte) 0);
+		}
+		for (int bn=1; bn < capacity; bn++) {
+			write(bn, vdb);
+		}
 		
 	}
 

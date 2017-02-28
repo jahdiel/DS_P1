@@ -1,7 +1,9 @@
 package diskUnitExceptions;
 
 public class InvalidBlockNumberException extends RuntimeException {
-	
+	/**
+	 * Exception thrown when block number is not within the accepted range. 
+	 */
 	public InvalidBlockNumberException() {}
 	
 	public InvalidBlockNumberException(String arg0) {
