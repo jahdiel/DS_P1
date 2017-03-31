@@ -150,9 +150,9 @@ public class DiskUnit implements DiskUnitInterface{
 	public void write(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException {
 		
 		try {
-			if (blockNum < 1 || blockNum > capacity)
+			if (blockNum < 1 || blockNum >= capacity)
 				throw new InvalidBlockNumberException("The block number "+blockNum+" is invalid.");
-			if (b == null || b.getCapacity() > blockSize)
+			if (b == null || b.getCapacity() != blockSize)
 				throw new InvalidBlockException("Invalid block instance.");
 			
 			int bytePos = blockNum * blockSize;
@@ -174,9 +174,9 @@ public class DiskUnit implements DiskUnitInterface{
 	public void read(int blockNum, VirtualDiskBlock b) throws InvalidBlockNumberException, InvalidBlockException {
 		
 		try {
-			if (blockNum < 0 || blockNum > capacity)
+			if (blockNum < 0 || blockNum >= capacity)
 				throw new InvalidBlockNumberException("The block number "+blockNum+" is invalid.");
-			if (b == null || b.getCapacity() > blockSize)
+			if (b == null || b.getCapacity() != blockSize)
 				throw new InvalidBlockException("Invalid block instance.");
 			
 			int bytePos = blockNum * blockSize;
