@@ -67,12 +67,6 @@ public class SystemCommandsProcessor extends CommandProcessor {
 
 		// commands for the state GENERALSTATE
 		
-		// the following are just for demonstration...
-		add(GENERALSTATE, SystemCommand.getVLSC("testoutput int", 
-				new TestOutputProcessor()));        // just for demonstration
-		add(GENERALSTATE, SystemCommand.getVLSC("addnumbers int_list", 
-				new AddNumbersProcessor()));        // just for demonstration
-		
 		// the following are for the different commands that are accepted by
 		// the shell-like system that manage lists of integers
 		
@@ -82,19 +76,21 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		// One need to make sure that the corresponding CommandActionHandler object
 		// is also working (in execute method) accordingly. See the documentation inside
 		// the CommandActionHandler class for testoutput command.
-		add(GENERALSTATE, SystemCommand.getVLSC("create name", new CreateProcessor())); 
 		
-		// the following commands are treated as fixed lentgh commands....
-		add(GENERALSTATE, SystemCommand.getFLSC("showlists", new ShowListsProcessor())); 		
-		add(GENERALSTATE, SystemCommand.getFLSC("append name int", new AppendProcessor())); 
-		add(GENERALSTATE, SystemCommand.getFLSC("showall name", new ShowAllProcessor())); 
+		// the following commands are treated as fixed length commands...
+		add(GENERALSTATE, SystemCommand.getFLSC("createdisk disk_name nblocks bsize", new CreateDiskProcessor())); 		
+		add(GENERALSTATE, SystemCommand.getFLSC("deletedisk disk_name", new DeleteDiskProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("mount disk_name", new MountDiskProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("unmount", new UnmountDiskProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("loadfile file_name ext_file_name", new LoadFileProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("cp filename1 filename2", new CopyFileProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("ls", new ListDirectoryProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("cat filename", new DisplayInternalFileProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("showdisks", new ShowDisksProcessor())); 
 		add(GENERALSTATE, SystemCommand.getFLSC("exit", new ShutDownProcessor())); 
 		add(GENERALSTATE, SystemCommand.getFLSC("help", new HelpProcessor())); 
 				
-		// need to follow this pattern to add a SystemCommand for each
-		// command that has been specified...
-		// ...
-		add(GENERALSTATE, SystemCommand.getFLSC("add name int int", new AddProcessor()));
+		
 		// set to execute....
 		stopExecution = false; 
 
@@ -126,45 +122,107 @@ public class SystemCommandsProcessor extends CommandProcessor {
 			return resultsList; 
 		}
 	}
-
 	
-	/** this is added just for testing purposes and is not part of 
-	 * what has been specified.
-	 * @author pirvos
-	 *
-	 */
-	private class TestOutputProcessor implements CommandActionHandler { 
-		public ArrayList<String> execute(Command c) {  
-			
-			// Implemented as a Variablle length command, just for testing
-			// such feature. For a fixed length alternative, just comment
-			// the following two lines, and remove comment markers from
-			// the two after. Remember to properly modify the line of
-			// code that adds the corresponding system command to 
-			// the processor --- so as to get a FLSC...
-			
-			VariableLengthCommand vlc = (VariableLengthCommand) c; 
-			String operand = vlc.getItemsForOperand(1).get(0);
-
-			//FixedLengthCommand fc = (FixedLengthCommand) c; 
-			//String operand = fc.getOperand(1); 
+	///////////// DATA PROJECT 2 INNER CLASSES ///////////////////////////
+	// eliminate the other classes once these are correctly implemented.
+	//////////////////////////////////////////////////////////////////////
+	
+	private class CreateDiskProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-
-			// the first operand is assumed to be an integer...
-			int operandInt = Integer.parseInt(operand); 
-			if (operandInt < 1) 
-				resultsList.add("Incorrect int value"); 
-			else 
-				for (int index=1; index <= operandInt; index++) 
-					resultsList.add("Line number "+index); 
-
+			resultsList.add("Creates Disk");
+			// TODO: Finish
 			return resultsList; 
-		} 
+		}
 	}
+	
+	private class DeleteDiskProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			
+			return resultsList; 
+		}
+	}
+	
+	private class ShowDisksProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			
+			return resultsList; 
+		}
+	}
+	
+	private class MountDiskProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			
+			return resultsList; 
+		}
+	}
+	
+	private class UnmountDiskProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			
+			return resultsList; 
+		}
+	}
+	
+	private class LoadFileProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			// TODO: Finish
+			return resultsList; 
+		}
+	}
+	
+	private class CopyFileProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			// TODO: Finish
+			return resultsList; 
+		}
+	}
+	
+	private class ListDirectoryProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			// TODO: Finish
+			return resultsList; 
+		}
+	}
+	
+	private class DisplayInternalFileProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
+
+			resultsList = new ArrayList<String>(); 
+			resultsList.add("Creates Disk");
+			// TODO: Finish
+			return resultsList; 
+		}
+	}
+	
+	
+	
+	//////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////
 
 	// classes added for the lab exercise about this project. 
-	
 	private class CreateProcessor implements CommandActionHandler {
 		@Override
 		public ArrayList<String> execute(Command c) {
