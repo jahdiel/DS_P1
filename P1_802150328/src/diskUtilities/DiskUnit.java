@@ -32,7 +32,7 @@ public class DiskUnit implements DiskUnitInterface{
 			disk = new RandomAccessFile(name, "rw");
 		}
 		catch (IOException e) {
-			System.err.println ("Unable to start the disk");
+			System.err.println("Unable to start the disk");
 			System.exit(1);
 		}
 	}
