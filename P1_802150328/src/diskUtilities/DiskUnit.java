@@ -12,8 +12,13 @@ public class DiskUnit implements DiskUnitInterface{
 	private static final int I_NODE_SIZE = 9;          // default number of bytes per i-node
 	
 	private int capacity;     	// number of blocks of current disk instance
-	private int blockSize; 	// size of each block of current disk instance
-
+	private int blockSize; 	    // size of each block of current disk instance
+	private int firstDataBlock; // index of the first data block (the root)
+	private int nextFreeBlock;  // index representing top 4 bytes position in block firstFLB
+	private int firstFreeINode; // index of first free i-node
+	private int iNodeNum;       // total number of i-nodes in the disk (free + taken)
+	
+	
 	// the file representing the simulated  disk, where all the disk blocks
 	// are stored
 	private RandomAccessFile disk;
@@ -53,6 +58,11 @@ public class DiskUnit implements DiskUnitInterface{
 			   dUnit.disk.seek(0);
 			   dUnit.capacity = dUnit.disk.readInt();
 			   dUnit.blockSize = dUnit.disk.readInt();
+			   dUnit.firstDataBlock = dUnit.disk.readInt();
+			   dUnit.nextFreeBlock = dUnit.disk.readInt();
+			   dUnit.firstFreeINode = dUnit.disk.readInt();
+			   dUnit.iNodeNum = dUnit.disk.readInt();
+			   
 		   } catch (IOException e) {
 			   e.printStackTrace();
 		   }
@@ -135,12 +145,17 @@ public class DiskUnit implements DiskUnitInterface{
 		// block 0 of disk space
 		try {
 			disk.seek(0);
-			disk.writeInt(capacity);  
-			disk.writeInt(blockSize);
+			disk.writeInt(capacity);  // Writes into disk the capacity
+			disk.writeInt(blockSize); // Writes into disk the blockSize
 			
-			int iNodeNum = (int) Math.max(1, (blockSize * capacity * 0.01)); // number of i-nodes in disk instance
-			int lastINodeBlock =  (int) (9 * (iNodeNum / blockSize));        // index of the last block containing an i-node
-			disk.writeInt(lastINodeBlock + 1);
+			int iNodeNum = (int) (blockSize * capacity * 0.01);          // number of i-nodes in disk instance
+			int lastINodeBlock =  (int) Math.max(1, Math.ceil(I_NODE_SIZE * (iNodeNum / blockSize)));  // index of the last block containing an i-node
+			int nextFreeBlock = 0;             //TODO: Finish this implementation
+			
+			disk.writeInt(lastINodeBlock + 1); // Writes into disk the index of the first data block (the root)
+			disk.writeInt(nextFreeBlock);      // Writes into disk the index representing top 4 bytes position in block firstFLB
+			disk.writeInt(blockSize);          // Writes into disk the index of first free i-node
+			disk.writeInt(iNodeNum);           // Writes into disk the total number of i-nodes in the disk (free + taken)
 		
 			
 		} catch (IOException e) {
