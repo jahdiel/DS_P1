@@ -247,30 +247,6 @@ public class SystemCommandsProcessor extends CommandProcessor {
 	}
 
 
-	// an additional command... just for demonstration....
-	private class AddNumbersProcessor implements CommandActionHandler { 
-		public ArrayList<String> execute(Command c) { 
-			
-						
-			VariableLengthCommand vlc = (VariableLengthCommand) c; 
-			ArrayList<String> operandList = vlc.getItemsForOperand(1);
-
-			resultsList = new ArrayList<String>(); 
-
-			// the first operand is assumed to be a list of integers...
-			// put all numbers in resultsList while adding them up
-			int sum = 0; 
-			resultsList.add("Numbers to add are: "); 
-			for (String operand : operandList) { 
-				resultsList.add(operand); 
-				sum += Integer.parseInt(operand); 
-			}
-			resultsList.add("===================="); 
-			resultsList.add("Total = " + sum); 
-
-			return resultsList; 
-		} 
-	}
 	
 	private class ShowListsProcessor implements CommandActionHandler { 
 		public ArrayList<String> execute(Command c) {  
