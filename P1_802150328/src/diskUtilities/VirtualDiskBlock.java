@@ -21,7 +21,7 @@ public class VirtualDiskBlock {
 	 * @param blockCapacity size of virtual disk block
 	 */
 	public VirtualDiskBlock(int blockCapacity) {
-		if (blockCapacity < 8)
+		if (blockCapacity < 32)
 			blockCapacity = DEFAULT_BLOCK_SIZE;
 		
 		elements = new byte[blockCapacity];

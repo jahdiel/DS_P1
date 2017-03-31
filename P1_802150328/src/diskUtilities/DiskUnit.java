@@ -9,6 +9,7 @@ public class DiskUnit implements DiskUnitInterface{
 
 	private static final int DEFAULT_CAPACITY = 1024;  // default number of blocks 	
 	private static final int DEFAULT_BLOCK_SIZE = 256; // default number of bytes per block
+	private static final int I_NODE_SIZE = 9;          // default number of bytes per i-node
 	
 	private int capacity;     	// number of blocks of current disk instance
 	private int blockSize; 	// size of each block of current disk instance
@@ -91,7 +92,7 @@ public class DiskUnit implements DiskUnitInterface{
 			throw new ExistingDiskException("Disk name is already used: " + name);
 
 		RandomAccessFile disk = null;
-		if (capacity < 0 || blockSize < 0 ||
+		if (capacity < 0 || blockSize < 32 ||
 				!isPowerOfTwo(capacity) || !isPowerOfTwo(blockSize))
 			throw new InvalidParameterException("Invalid values: " +
 					" capacity = " + capacity + " block size = " +
@@ -136,6 +137,12 @@ public class DiskUnit implements DiskUnitInterface{
 			disk.seek(0);
 			disk.writeInt(capacity);  
 			disk.writeInt(blockSize);
+			
+			int iNodeNum = (int) Math.max(1, (blockSize * capacity * 0.01)); // number of i-nodes in disk instance
+			int lastINodeBlock =  (int) (9 * (iNodeNum / blockSize));        // index of the last block containing an i-node
+			disk.writeInt(lastINodeBlock + 1);
+		
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 	
