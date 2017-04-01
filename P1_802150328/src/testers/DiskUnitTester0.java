@@ -7,11 +7,11 @@ public class DiskUnitTester0 {
 	 * @param args Systems argument
 	 */
 	public static void main(String[] args) {
-		DiskUnit.createDiskUnit("disk1", 256, 16);
+		DiskUnit.createDiskUnit("disk1", 256, 32);
 		DiskUnit.createDiskUnit("disk2", 256, 32);
 		DiskUnit.createDiskUnit("disk3", 256, 64);
 		DiskUnit.createDiskUnit("disk4", 256, 128);
-		DiskUnit.createDiskUnit("disk5", 256, 8);
+		DiskUnit.createDiskUnit("disk5", 256, 32);
 
 		String[] disks = {"disk1", "disk2", "disk3", "disk4", "disk5"};
 

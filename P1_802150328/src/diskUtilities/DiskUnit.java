@@ -148,19 +148,58 @@ public class DiskUnit implements DiskUnitInterface{
 			disk.writeInt(capacity);  // Writes into disk the capacity
 			disk.writeInt(blockSize); // Writes into disk the blockSize
 			
-			int iNodeNum = (int) (blockSize * capacity * 0.01);          // number of i-nodes in disk instance
-			int lastINodeBlock =  (int) Math.max(1, Math.ceil(I_NODE_SIZE * (iNodeNum / blockSize)));  // index of the last block containing an i-node
+			double iNodeNum = blockSize * capacity * 0.01;          // number of i-nodes in disk instance
+			int numOfINodeBlocks =  (int) Math.max(1, Math.ceil(I_NODE_SIZE * ( iNodeNum / blockSize)));  // index of the block reserved for i-nodes
 			int nextFreeBlock = 0;             //TODO: Finish this implementation
+			int firstFreeINode = blockSize + 9;    // index of first free i-node,adds 9 because root takes the first i-node.
 			
-			disk.writeInt(lastINodeBlock + 1); // Writes into disk the index of the first data block (the root)
-			disk.writeInt(nextFreeBlock);      // Writes into disk the index representing top 4 bytes position in block firstFLB
-			disk.writeInt(blockSize);          // Writes into disk the index of first free i-node
-			disk.writeInt(iNodeNum);           // Writes into disk the total number of i-nodes in the disk (free + taken)
+			disk.writeInt(numOfINodeBlocks + 1); // Writes into disk the index of the first data block (the root)
+			disk.writeInt(nextFreeBlock);        // Writes into disk the index representing top 4 bytes position in block firstFLB
+			disk.writeInt(firstFreeINode);       // Writes into disk the byte index of first free i-node
+			disk.writeInt((int)iNodeNum);        // Writes into disk the total number of i-nodes in the disk (free + taken)
+			
+			reserveINodesSpace(disk, capacity,blockSize, (int)iNodeNum, numOfINodeBlocks);
 		
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 	
+	}
+	 /**
+	  * Reserves space for the i-nodes in the disk.
+	  * @param disk
+	  *	@param capacity
+	  * @param blockSize
+	  */
+	private static void reserveINodesSpace(RandomAccessFile disk, int capacity, int blockSize, int numOfINodes, int numOfINodeBlocks) {
+		
+		int nodesPerBlock = blockSize / 9;
+		int firstINode = blockSize;
+		int iNodeCounter = 0;              // Counts the amount of i-nodes created   
+		try {
+			for (int i= firstINode; i <= (blockSize * numOfINodeBlocks); i+=blockSize) { // Iterates through the disk blocks with i-nodes.
+				disk.seek(i);
+				
+				for (int j=1; j <= nodesPerBlock; j++) {  // Creates the amount of i-nodes that fit inside a block.
+					disk.writeBoolean(false);	  // Indicates if i-node corresponds to a file or directory. Is 0 if it is a data file. (Type)
+					disk.writeInt(0);             // Number of bytes the file has. (Size)
+					if (iNodeCounter == numOfINodes) {
+						disk.writeInt(0);
+						return;
+					}
+					else if (j == nodesPerBlock)  		  // If i-node is last in block, point to the next i-node block 
+						disk.writeInt(i+blockSize);   // Number of first file block or next free i-node (first block)
+					else
+						disk.writeInt(i+(j*9));       // i + (j * 9) points to the byte index of the next i-node in the same block.
+					
+					iNodeCounter++;
+				}	
+			}	
+		} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 	}
 	
 	private static boolean isPowerOfTwo(int n) {
