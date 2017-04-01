@@ -50,7 +50,7 @@ public class DiskUnitTester1 {
 	    	if (Character.isLetterOrDigit(c))
 	    		System.out.print(c); 
 	    	else
-	    		System.out.print(c+" "); 
+	    		System.out.print("-"); 
 	    }
 	    System.out.println(); 
 	}

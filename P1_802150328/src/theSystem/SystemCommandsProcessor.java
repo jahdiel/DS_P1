@@ -82,13 +82,13 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		
 		// the following commands are treated as fixed length commands...
 		add(GENERALSTATE, SystemCommand.getFLSC("createdisk name int int", new CreateDiskProcessor())); 		
-		add(GENERALSTATE, SystemCommand.getFLSC("deletedisk disk_name", new DeleteDiskProcessor()));
-		add(GENERALSTATE, SystemCommand.getFLSC("mount disk_name", new MountDiskProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("deletedisk name", new DeleteDiskProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("mount name", new MountDiskProcessor()));
 		add(GENERALSTATE, SystemCommand.getFLSC("unmount", new UnmountDiskProcessor()));
-		add(GENERALSTATE, SystemCommand.getFLSC("loadfile file_name ext_file_name", new LoadFileProcessor()));
-		add(GENERALSTATE, SystemCommand.getFLSC("cp filename1 filename2", new CopyFileProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("loadfile name name", new LoadFileProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("cp name name", new CopyFileProcessor()));
 		add(GENERALSTATE, SystemCommand.getFLSC("ls", new ListDirectoryProcessor()));
-		add(GENERALSTATE, SystemCommand.getFLSC("cat filename", new DisplayInternalFileProcessor()));
+		add(GENERALSTATE, SystemCommand.getFLSC("cat name", new DisplayInternalFileProcessor()));
 		add(GENERALSTATE, SystemCommand.getFLSC("showdisks", new ShowDisksProcessor())); 
 		add(GENERALSTATE, SystemCommand.getFLSC("exit", new ShutDownProcessor())); 
 		add(GENERALSTATE, SystemCommand.getFLSC("help", new HelpProcessor())); 

@@ -280,6 +280,82 @@ public class DiskUnit implements DiskUnitInterface{
 		return 0;
 	}
 
+	public int getFirstDataBlock() {
+		try {
+			disk.seek(8);
+			return disk.readInt();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public void setFirstDataBlock(int firstDataBlock) {
+		try {
+			disk.seek(8);
+			disk.writeInt(firstDataBlock);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public int getNextFreeBlock() {
+		try {
+			disk.seek(12);
+			return disk.readInt();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public void setNextFreeBlock(int nextFreeBlock) {
+		try {
+			disk.seek(12);
+			disk.writeInt(nextFreeBlock);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public int getFirstFreeINode() {
+		try {
+			disk.seek(16);
+			return disk.readInt();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public void setFirstFreeINode(int firstFreeINode) {
+		try {
+			disk.seek(16);
+			disk.writeInt(firstFreeINode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public int getiNodeNum() {
+		try {
+			disk.seek(20);
+			return disk.readInt();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public void setiNodeNum(int iNodeNum) {
+		try {
+			disk.seek(20);
+			disk.writeInt(iNodeNum);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public void lowLevelFormat() {
 		
