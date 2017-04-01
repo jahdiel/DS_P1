@@ -9,10 +9,11 @@ public class DiskUnitTester0 {
 	public static void main(String[] args) {
 		DiskUnit.createDiskUnit("disk1", 256, 32);
 		DiskUnit.createDiskUnit("disk2", 256, 32);
-		DiskUnit.createDiskUnit("disk3", 256, 64);
-		DiskUnit.createDiskUnit("disk4", 256, 128);
+		DiskUnit.createDiskUnit("disk3", 256, 32);
+		DiskUnit.createDiskUnit("disk4", 256, 32);
 		DiskUnit.createDiskUnit("disk5", 256, 32);
 
+		
 		String[] disks = {"disk1", "disk2", "disk3", "disk4", "disk5"};
 
 
@@ -27,9 +28,9 @@ public class DiskUnitTester0 {
 				"works. Why is the output as it is on each case? Basically, we are creating a file. "; 
 
 		for (int i=0; i<disks.length; i++) {
-			DiskUnit d = DiskUnit.mount(disks[i]);  			
-			splitAndWriteToDisk(s, d);  
-			d.shutdown(); 
+			//DiskUnit d = DiskUnit.mount(disks[i]);  			
+			//splitAndWriteToDisk(s, d);  
+			//d.shutdown(); 
 		}
 
 	}

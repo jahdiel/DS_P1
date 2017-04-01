@@ -46,11 +46,11 @@ public class DiskUnitTester1 {
 	private static void showVirtualDiskBlock(int b, VirtualDiskBlock block) {
 	    System.out.print(" Block "+ b + "\t"); 
 	    for (int i=0; i<block.getCapacity(); i++) {
-	    	char c = (char) block.getElement(i); 
+	    	byte c = (byte) block.getElement(i); 
 	    	if (Character.isLetterOrDigit(c))
 	    		System.out.print(c); 
 	    	else
-	    		System.out.print('-'); 
+	    		System.out.print(c+" "); 
 	    }
 	    System.out.println(); 
 	}
