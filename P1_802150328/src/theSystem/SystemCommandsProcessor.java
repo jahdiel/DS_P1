@@ -2,6 +2,7 @@ package theSystem;
 
 import java.util.ArrayList;
 
+import diskUnitExceptions.InvalidParameterException;
 import operandHandlers.OperandValidatorUtils;
 import lists.DLDHDTList;
 import lists.LLIndexList1;
@@ -13,6 +14,8 @@ import systemGeneralClasses.FixedLengthCommand;
 import systemGeneralClasses.SystemCommand;
 import systemGeneralClasses.VariableLengthCommand;
 import stack.IntStack;
+
+import diskUtilities.DiskManager;
 
 
 /**
@@ -78,7 +81,7 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		// the CommandActionHandler class for testoutput command.
 		
 		// the following commands are treated as fixed length commands...
-		add(GENERALSTATE, SystemCommand.getFLSC("createdisk disk_name nblocks bsize", new CreateDiskProcessor())); 		
+		add(GENERALSTATE, SystemCommand.getFLSC("createdisk name int int", new CreateDiskProcessor())); 		
 		add(GENERALSTATE, SystemCommand.getFLSC("deletedisk disk_name", new DeleteDiskProcessor()));
 		add(GENERALSTATE, SystemCommand.getFLSC("mount disk_name", new MountDiskProcessor()));
 		add(GENERALSTATE, SystemCommand.getFLSC("unmount", new UnmountDiskProcessor()));
@@ -131,8 +134,21 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
-			// TODO: Finish
+			FixedLengthCommand fc = (FixedLengthCommand) c;
+			String name = fc.getOperand(1);
+			int nBlocks = Integer.parseInt(fc.getOperand(2));
+			int bSize = Integer.parseInt(fc.getOperand(3));
+			
+			try {
+				DiskManager.createDiskUnit(name, nBlocks, bSize);
+			} catch (InvalidParameterException e) {
+				if (bSize < 32)
+					resultsList.add("Invalid number: Blocksize needs to be greater than or equal to 32.");
+				else if (nBlocks < 0)
+					resultsList.add("Invalid number: Capacity needs to be greater than 0.");
+				else
+					resultsList.add("Capacity and Blocksize need to be power of 2.");
+			}
 			return resultsList; 
 		}
 	}

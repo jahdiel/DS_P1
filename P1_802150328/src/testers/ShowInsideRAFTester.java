@@ -9,7 +9,7 @@ public class ShowInsideRAFTester {
 	 * @param args systems argument
 	 */
 	public static void main(String[] args) {
-		DiskUnit d = DiskUnit.mount("disk1"); // edit the name of the disk to mount
+		DiskUnit d = DiskUnit.mount("first"); // edit the name of the disk to mount
 		
 		System.out.println("The capacity is: "+d.getCapacity());
 		System.out.println("The blocksize is: "+d.getBlockSize());
