@@ -75,16 +75,6 @@ public class FreeBlockManager {
 		DiskUtils.copyIntToBlock(vdb, 4*index, value); // Copies integer into the different possible indexes inside VDB
 		d.write(blockNum, vdb);
 	}
-	/*public static void setIntInsideBlock(DiskUnit disk, int blockNum, int index, int value) {
-		int bytePos = (blockNum * disk.getBlockSize()) + (4*index);
-		try {
-			disk.disk.seek(bytePos);
-			disk.disk.writeInt(value);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}*/
 	
 	/**
 	 * 
