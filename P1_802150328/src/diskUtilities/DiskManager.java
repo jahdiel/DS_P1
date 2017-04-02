@@ -1,5 +1,10 @@
 package diskUtilities;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import diskUnitExceptions.ExistingDiskException;
 import diskUnitExceptions.InvalidParameterException;
 
@@ -9,11 +14,10 @@ public class DiskManager {
 	 * @author Jahdiel Alvarez
 	 */
 	
-	public static final int I_NODE_SIZE = 9; 
+	public static final int I_NODE_SIZE = 9; // Bytes per i-node
 	
-	public DiskManager() {
-		
-	}
+	public static String[] diskUnitNames; // Stores in memory the name of the disk units created.
+	
 	
 	/**
 	 * Creates a new disk unit with the provided parameters.
@@ -26,6 +30,10 @@ public class DiskManager {
 			throws ExistingDiskException, InvalidParameterException {
 		
 		//TODO: create DiskNames text file if doesn't exist
+		
+		// Verifying DiskUnit folder exists and add Unit to DiskNames text file
+		createDiskDirectory();
+		addUnitToDiskNames(name);
 		
 		DiskUnit.createDiskUnit(name, capacity, blockSize);
 		// Mount the disk unit in order to create its root directory.
@@ -89,7 +97,65 @@ public class DiskManager {
 		d.write(rootINodePos, firstBlockRef);
 	}
 	
+	/**
+	 * Creates the DiskUnit directory. This directory stores all the RAF files
+	 * and the DiskNames text file.
+	 * @return Returns true if the directory was created.
+	 */
+	public static boolean createDiskDirectory() {
+		
+		File diskDir = new File("DiskUnits");
+		try{
+		// if the directory does not exist, create it
+		if (!diskDir.exists()) {
+		        diskDir.mkdir();
+		        return true;
+		    } 
+		} catch(SecurityException se){
+	        se.printStackTrace();
+	    }          		  
+		return false;
+	}
+	/**
+	 * Creates the DiskNames text file. This file stores the name of the 
+	 * DiskUnits created. 
+	 * @return Returns true if the file was created.
+	 */
+	private static boolean createDiskNamesFile() {
+		File diskName = new File("DiskUnits", "DiskNames.txt");
+		// if the file does not exist, return true
+		try {
+			if (diskName.createNewFile())
+			   return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
 	
+	/**
+	 * Adds newly created Disk Unit name to the Disks Name text file
+	 * @param name Name of the disk unit
+	 */
+	public static void addUnitToDiskNames(String name) {
+		try {
+			createDiskNamesFile();
+			File diskNames = new File("DiskUnits", "DiskNames.txt");
+			if (!diskNames.exists()) {
+				System.out.println("Could not find DiskNames.txt file");
+				return;
+			} else {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(diskNames, true));
+				writer.write(name);
+				writer.close();
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	
 

@@ -27,7 +27,7 @@ public class DiskUnit implements DiskUnitInterface{
 	/**
 	    @param name is the name of the disk
 	 **/
-	private DiskUnit(String name) {
+	private DiskUnit(File name) {
 		try {
 			disk = new RandomAccessFile(name, "rw");
 		}
@@ -46,11 +46,11 @@ public class DiskUnit implements DiskUnitInterface{
 	 *    "disk" with the specified name is found.
 	*/
 	public static DiskUnit mount(String name) throws NonExistingDiskException {
-		File file=new File(name);
+		File file=new File("DiskUnits", name);
 		   if (!file.exists())
 		       throw new NonExistingDiskException("No disk has name : " + name);
 		  
-		   DiskUnit dUnit = new DiskUnit(name);
+		   DiskUnit dUnit = new DiskUnit(file);
 		   	
 		   // get the capacity and the block size of the disk from the file
 		   // representing the disk
@@ -97,7 +97,7 @@ public class DiskUnit implements DiskUnitInterface{
 	*/
 	public static void createDiskUnit(String name, int capacity, int blockSize) 
 			throws ExistingDiskException, InvalidParameterException {
-		File file=new File(name);
+		File file=new File("DiskUnits",name);
 		if (file.exists())
 			throw new ExistingDiskException("Disk name is already used: " + name);
 
@@ -110,7 +110,7 @@ public class DiskUnit implements DiskUnitInterface{
 		// disk parameters are valid... hence create the file to represent the
 		// disk unit.
 		try {
-			disk = new RandomAccessFile(name, "rw");
+			disk = new RandomAccessFile(file, "rw");
 		}
 		catch (IOException e) {
 			System.err.println ("Unable to start the disk");
