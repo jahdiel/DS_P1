@@ -13,7 +13,7 @@ public class DiskUnit implements DiskUnitInterface{
 	
 	private int capacity;     	// number of blocks of current disk instance
 	private int blockSize; 	    // size of each block of current disk instance
-	private int firstDataBlock; // index of the first data block (the root)
+	private int firstDataBlock; // index of the first free data block (the root of free block collection)
 	private int nextFreeBlock;  // index representing top 4 bytes position in block firstFLB
 	private int firstFreeINode; // index of first free i-node
 	private int iNodeNum;       // total number of i-nodes in the disk (free + taken)
@@ -153,7 +153,7 @@ public class DiskUnit implements DiskUnitInterface{
 			int nextFreeBlock = 0;             //TODO: Finish this implementation
 			int firstFreeINode = blockSize + 9;    // index of first free i-node,adds 9 because root takes the first i-node.
 			
-			disk.writeInt(numOfINodeBlocks + 1); // Writes into disk the index of the first data block (the root)
+			disk.writeInt(numOfINodeBlocks + 2); // Writes into disk the index of the first data block (the root of free block structure)
 			disk.writeInt(nextFreeBlock);        // Writes into disk the index representing top 4 bytes position in block firstFLB
 			disk.writeInt(firstFreeINode);       // Writes into disk the byte index of first free i-node
 			disk.writeInt(iNodeNum);             // Writes into disk the total number of i-nodes in the disk (free + taken)

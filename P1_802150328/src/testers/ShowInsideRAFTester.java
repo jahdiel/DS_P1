@@ -44,7 +44,7 @@ public class ShowInsideRAFTester {
 	public static void ShowINodeBlocks(DiskUnit d) {
 		int count = 1;
 		int bytePos = 32;
-		int numOfBlocks = d.getFirstDataBlock();
+		int numOfBlocks = (int) Math.ceil((d.getiNodeNum() * 9.0) / d.getBlockSize()) + 1;
 
 		try {
 			d.disk.seek(bytePos);
@@ -68,7 +68,7 @@ public class ShowInsideRAFTester {
 	}
 	
 	public static void ShowDataBlocks(DiskUnit d) {	
-		int numOfBlocks = d.getFirstDataBlock();
+		int numOfBlocks = (int) Math.ceil((d.getiNodeNum() * 9.0) / d.getBlockSize()) + 1;
 		int bytePos = 32 * numOfBlocks;
 		int count = numOfBlocks;
 		int capacity = d.getCapacity();
