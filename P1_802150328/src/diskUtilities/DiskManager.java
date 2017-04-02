@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import diskUnitExceptions.ExistingDiskException;
 import diskUnitExceptions.InvalidParameterException;
+import diskUnitExceptions.NonExistingDiskException;
 
 public class DiskManager {
 	/**
@@ -20,6 +21,8 @@ public class DiskManager {
 	public static final int I_NODE_SIZE = 9; // Bytes per i-node
 	
 	public static ArrayList<String> diskUnitNames = new ArrayList<>(); // Stores in memory the name of the disk units created.
+	public static String mountedDiskName = null;   // Name of the DiskUnit which is mounted.
+	public static DiskUnit mountedDiskUnit = null; // DiskUnit instance object of the mounted disk.
 	
 	
 	/**
@@ -136,12 +139,76 @@ public class DiskManager {
 			int capacity = d.getCapacity();
 			int blockSize = d.getBlockSize();
 			
-			System.out.printf("%-22s%-22d%-22d\n",s,capacity,blockSize);
+			if (mountedDiskUnit != null && mountedDiskName.equals(s))
+				System.out.printf("%-22s%-22d%-22d%-22s\n",s,capacity,blockSize,"yes");
+			else
+				System.out.printf("%-22s%-22d%-22d\n",s,capacity,blockSize);
+			
 			d.shutdown();
 		}
 		System.out.println();
 	}
-	
-	
+	/**
+	 * Mounts the specified disk unit and makes it the “current working disk unit”.  The successful 
+	 * execution of this command also makes the root directory in the particular disk unit being mounted 
+	 * as the current directory in the system. The current directory is the directory of the current 
+	 * working disk where the commands specified will work on. Each of the following commands require some 
+	 * disk to be the current working disk unit, and they work upon that particular unit. 
+	 * If there's no current working disk unit, then the command just ends with an appropriate error message.
+	 */
+	public static void mountDisk(String name) {
+		
+		if (mountedDiskName != null) {
+			System.out.println("There is already a mounted disk. Unmount DiskUnit "+mountedDiskName+" first.");
+			return;
+		}
+		try {
+			DiskUnit d = DiskUnit.mount(name);
+			mountedDiskName = name;
+			mountedDiskUnit = d;
+			System.out.println(name+" mounted successfully.");
+		} catch (NonExistingDiskException e) {
+			System.out.println(e.getMessage());
+		}
+		
+	}
+	/**
+	 * The successful execution of this command unmounts the current working disk unit, if any. 
+	 * If there is no current working disk unit, then the command just shows an appropriate message. 
+	 * Notice that this command does not delete the disk unit, it just unmounts it 
+	 * without altering its content. After the execution of this command the system will 
+	 * have no current disk unit. In order to have one again, the mount command needs to be executed. 
+	 */
+	public static void unmountDisk() {
+		
+		if (mountedDiskName == null && mountedDiskUnit == null) {
+			System.out.println("No disk is mounted.");
+			return;
+		}
+		System.out.println(mountedDiskName+" unmounted successfully.");
+		mountedDiskName = null;
+		mountedDiskUnit = null;
+		
+	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

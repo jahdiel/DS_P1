@@ -180,8 +180,10 @@ public class SystemCommandsProcessor extends CommandProcessor {
 	private class MountDiskProcessor implements CommandActionHandler { 
 		public ArrayList<String> execute(Command c) { 
 
-			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
+			resultsList = new ArrayList<String>();
+			FixedLengthCommand fc = (FixedLengthCommand) c;
+			String name = fc.getOperand(1);
+			DiskManager.mountDisk(name);
 			
 			return resultsList; 
 		}
@@ -191,7 +193,7 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
+			DiskManager.unmountDisk();
 			
 			return resultsList; 
 		}
