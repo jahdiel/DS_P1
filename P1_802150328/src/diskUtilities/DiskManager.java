@@ -1,9 +1,12 @@
 package diskUtilities;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import diskUnitExceptions.ExistingDiskException;
 import diskUnitExceptions.InvalidParameterException;
@@ -16,7 +19,7 @@ public class DiskManager {
 	
 	public static final int I_NODE_SIZE = 9; // Bytes per i-node
 	
-	public static String[] diskUnitNames; // Stores in memory the name of the disk units created.
+	public static ArrayList<String> diskUnitNames = new ArrayList<>(); // Stores in memory the name of the disk units created.
 	
 	
 	/**
@@ -147,13 +150,38 @@ public class DiskManager {
 				return;
 			} else {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(diskNames, true));
-				writer.write(name);
+				writer.write(name+"\n");
 				writer.close();
 			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	/**
+	 * Gets the disk unit names and place it into an ArrayList.
+	 * In order to keep the names in memory.
+	 */
+	public static void getDiskUnitNames() {
+		String line; // Hold the reader lines
+		try {
+			File diskNamesText = new File("DiskUnits", "DiskNames.txt");
+			if (!diskNamesText.exists())
+				return;
+			BufferedReader reader = new BufferedReader(new FileReader(diskNamesText));		
+			do {
+				line = reader.readLine();
+				if (line != null)
+					diskUnitNames.add(line);
+			} while (line != null);
+		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// Test
+		for (String s : diskUnitNames) {
+			System.out.println(s);
 		}
 	}
 	

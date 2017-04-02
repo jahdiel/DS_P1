@@ -21,6 +21,7 @@ public class MySystem {
 		
 		// Initialing Shell
 		DiskManager.createDiskDirectory(); // Creates the DiskUnit directory
+		DiskManager.getDiskUnitNames();    // Place in memory the names of the already created DiskUnits
 		
 		// Processing commands
 		SystemController system = new SystemController(); 
