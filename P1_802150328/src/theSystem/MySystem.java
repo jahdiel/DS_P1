@@ -5,7 +5,7 @@ package theSystem;
 
 import java.io.IOException;
 
-import diskUtilities.DiskManager;
+import diskUtilities.*;
 import systemGeneralClasses.SystemController;
 
 /**
@@ -20,8 +20,8 @@ public class MySystem {
 	public static void main(String[] args) throws IOException  {
 		
 		// Initialing Shell
-		DiskManager.createDiskDirectory(); // Creates the DiskUnit directory
-		DiskManager.getDiskUnitNames();    // Place in memory the names of the already created DiskUnits
+		DirectoryManager.createDiskDirectory(); // Creates the DiskUnit directory
+		DirectoryManager.getDiskUnitNames();    // Place in memory the names of the already created DiskUnits
 		
 		// Processing commands
 		SystemController system = new SystemController(); 

@@ -141,6 +141,7 @@ public class SystemCommandsProcessor extends CommandProcessor {
 			
 			try {
 				DiskManager.createDiskUnit(name, nBlocks, bSize);
+				resultsList.add("DiskUnit "+name+" has been created.");
 			} catch (InvalidParameterException e) {
 				if (bSize < 32)
 					resultsList.add("Invalid number: Blocksize needs to be greater than or equal to 32.");
@@ -157,7 +158,10 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
+			FixedLengthCommand fc = (FixedLengthCommand) c;
+			String name = fc.getOperand(1);
+			
+			DiskManager.deleteDiskUnit(name);
 			
 			return resultsList; 
 		}
@@ -167,7 +171,7 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
+			DiskManager.showDiskUnits();
 			
 			return resultsList; 
 		}

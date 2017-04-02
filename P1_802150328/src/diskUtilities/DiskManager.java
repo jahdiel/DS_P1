@@ -35,8 +35,8 @@ public class DiskManager {
 		//TODO: create DiskNames text file if doesn't exist
 		
 		// Verifying DiskUnit folder exists and add Unit to DiskNames text file
-		createDiskDirectory();
-		addUnitToDiskNames(name);
+		DirectoryManager.createDiskDirectory();
+		DirectoryManager.addUnitToDiskNames(name);
 		
 		DiskUnit.createDiskUnit(name, capacity, blockSize);
 		// Mount the disk unit in order to create its root directory.
@@ -101,88 +101,45 @@ public class DiskManager {
 	}
 	
 	/**
-	 * Creates the DiskUnit directory. This directory stores all the RAF files
-	 * and the DiskNames text file.
-	 * @return Returns true if the directory was created.
+	 * Deletes a disk unit with the provided name.
+	 * @param name Name of the disk unit to be eliminated.
 	 */
-	public static boolean createDiskDirectory() {
-		
-		File diskDir = new File("DiskUnits");
-		try{
-		// if the directory does not exist, create it
-		if (!diskDir.exists()) {
-		        diskDir.mkdir();
-		        return true;
-		    } 
-		} catch(SecurityException se){
-	        se.printStackTrace();
-	    }          		  
-		return false;
-	}
-	/**
-	 * Creates the DiskNames text file. This file stores the name of the 
-	 * DiskUnits created. 
-	 * @return Returns true if the file was created.
-	 */
-	private static boolean createDiskNamesFile() {
-		File diskName = new File("DiskUnits", "DiskNames.txt");
-		// if the file does not exist, return true
-		try {
-			if (diskName.createNewFile())
-			   return true;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public static void deleteDiskUnit(String name) {
+
+		File unitToDelete = new File("DiskUnits",name); //created to actually delete the disk
+		if (!unitToDelete.exists()) {
+			System.out.println(name+" does not exist.");
+			return;
 		}
-		return false;
+		System.out.println(name+" has been removed.");
+		unitToDelete.delete();
+		DirectoryManager.removeUnitFromDiskNames(name);
+		
 	}
 	
 	/**
-	 * Adds newly created Disk Unit name to the Disks Name text file
-	 * @param name Name of the disk unit
+	 * Shows the list of disk units that are active in the system. 
+	 * For each disk unit, it displays its name, the number of blocks 
+	 * it has and the size for each block it has. It also shows 
+	 * if the corresponding disk unit is currently mounted or not-mounted.
 	 */
-	public static void addUnitToDiskNames(String name) {
-		try {
-			createDiskNamesFile();
-			File diskNames = new File("DiskUnits", "DiskNames.txt");
-			if (!diskNames.exists()) {
-				System.out.println("Could not find DiskNames.txt file");
-				return;
-			} else {
-				BufferedWriter writer = new BufferedWriter(new FileWriter(diskNames, true));
-				writer.write(name+"\n");
-				writer.close();
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	/**
-	 * Gets the disk unit names and place it into an ArrayList.
-	 * In order to keep the names in memory.
-	 */
-	public static void getDiskUnitNames() {
-		String line; // Hold the reader lines
-		try {
-			File diskNamesText = new File("DiskUnits", "DiskNames.txt");
-			if (!diskNamesText.exists())
-				return;
-			BufferedReader reader = new BufferedReader(new FileReader(diskNamesText));		
-			do {
-				line = reader.readLine();
-				if (line != null)
-					diskUnitNames.add(line);
-			} while (line != null);
+	public static void showDiskUnits() {
 		
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (DiskManager.diskUnitNames.isEmpty()) {
+			System.out.println("No disk units in the file system.");
+			return;
 		}
-		// Test
-		for (String s : diskUnitNames) {
-			System.out.println(s);
+		System.out.printf("%-22s%-22s%-22s%-22s\n","Name:", "Capacity:", "Blocksize:", "Mounted:");
+		System.out.println("---------------------------------------------------------------------------");
+		for (String s : DiskManager.diskUnitNames) {
+			DiskUnit d = DiskUnit.mount(s);
+			int capacity = d.getCapacity();
+			int blockSize = d.getBlockSize();
+			
+			System.out.printf("%-22s%-22d%-22d\n",s,capacity,blockSize);
+			d.shutdown();
 		}
+		System.out.println();
 	}
 	
 	
