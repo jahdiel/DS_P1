@@ -37,20 +37,18 @@ public class FileManager {
 		// TODO: Implemenent verifying if file already exists.
 		
 		// Byte position of the next free space to write the filename inside the directory.
-		int rootBlockNum = getDataBlockFromINode(disk, 0, blockSize);
-		ArrayList<Integer> newFileInRoot = getFreePosInDirectory(disk, rootBlockNum, blockSize);
+		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0, blockSize);
 		
-		// Write file name inside root and assign a free i-node to reference it.
-		// TODO: Get the free node.
-		 
+		// Write new file into root directory
+		writeNewFileIntoDirectory(disk, file, rootBlockNum);
 		
 	}
 	/**
-	 * Provides the byte position of the next free space to write the file name and i-node index
+	 * Provides ArrayList with block number in first index and free byte position in second index.
 	 * @param d DiskUnit in use
 	 * @param blockNum Number of data block
 	 * @param blockSize Bytes per block
-	 * @return byte position of free space to write file name and i-node index
+	 * @return ArrayList with block number in first index and free byte position in second index.
 	 */
 	public static ArrayList<Integer> getFreePosInDirectory(DiskUnit d, int blockNum, int blockSize) {
 		
@@ -75,43 +73,7 @@ public class FileManager {
 		}
 		return getFreePosInDirectory(d, nextBlockInt, blockSize);
 	}
-	/**
-	 * Returns ArrayList with the block number of where the i-node is stored and
-	 * byte position of where the iNode is in the block.
-	 * @param iNodeIndex Index of the i-node
-	 * @param blockSize Bytes per block
-	 * @return ArrayList with the block number of where the i-node is stored and
-	 * byte position of where the iNode is in the block 
-	 */
-	public static ArrayList<Integer> getINodePos(int iNodeIndex, int blockSize) {
-		
-		int nodesPerBlock = blockSize / 9;
-		int blockNum = (1 + (iNodeIndex / nodesPerBlock)); // block number of where the i-node is stored
-		int iNodeBytePos = ((iNodeIndex % nodesPerBlock) * 9); // byte position of where the iNode is in the block
-		
-		ArrayList<Integer> nodeArray = new ArrayList<>();
-		nodeArray.add(blockNum);
-		nodeArray.add(iNodeBytePos);
-		
-		return nodeArray;
-	}
-	/**
-	 * Gets the first data block from an i-node using its index.
-	 * @param d
-	 * @param iNodeIndex
-	 * @param blockSize
-	 * @return
-	 */
-	public static int getDataBlockFromINode(DiskUnit d, int iNodeIndex, int blockSize) {
-		
-		ArrayList<Integer> iNodeInfo = getINodePos(iNodeIndex, blockSize);
-		int iNodeBlockNum = iNodeInfo.get(0); // get blockNum of the iNode 
-		int iNodeBytePos = iNodeInfo.get(1);  // get iNode byte position
-		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
-		d.read(iNodeBlockNum, vdb);
-		
-		return DiskUtils.getIntFromBlock(vdb, iNodeBytePos);
-	}
+	
 	
 	/**
 	 * Find if file is inside the root directory.
@@ -172,9 +134,48 @@ public class FileManager {
 				return true;
 		}
 		return false;
+	}
+	/**
+	 * Write the file name and i-node reference into a directory.
+	 * Writes file name right after the last file name in directory.
+	 * @param d
+	 * @param file
+	 * @param blockNum
+	 * @param blockSize
+	 * @throws IllegalArgumentException
+	 */
+	public static void writeNewFileIntoDirectory(DiskUnit d, String file, int blockNum) 
+			throws IllegalArgumentException {
+		
+		int blockSize = d.getBlockSize();
+		// New file string int char array.
+		char[] fileCharArray = file.toCharArray();
+		if (fileCharArray.length > 20) {
+			throw new IllegalArgumentException("File name is greater than 20 characters.");
+		}
+			
+		// Get free byte position in directory
+		ArrayList<Integer> newFileInRoot = getFreePosInDirectory(d, blockNum, blockSize);
+		// Write file name inside root and assign a free i-node to reference it.
+		// Obtain free i-node index
+		int iNodeRef = INodeManager.getFreeINode(d);
+		// Write file name and node index into root;
+		int newFileBlockNum = newFileInRoot.get(0);
+		int newFileBytePos = newFileInRoot.get(1);
+		
+		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
+		d.read(blockNum, vdb);
+		
+		// Write file name inside the block
+		for (int i=0; i<fileCharArray.length; i++) {
+			DiskUtils.copyCharToBlock(vdb, newFileBytePos, fileCharArray[i]);
+		}
+		// Copy i-node reference into the directory.
+		DiskUtils.copyIntToBlock(vdb, newFileBytePos+20, iNodeRef);
+		// Write the Virtual block back into the disk unit.
+		d.write(newFileBlockNum, vdb);
 		
 	}
-	
 	
 	
 	
