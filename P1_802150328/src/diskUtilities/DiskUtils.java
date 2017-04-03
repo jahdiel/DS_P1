@@ -108,7 +108,7 @@ public class DiskUtils {
 	 * @param file File to be read.
 	 * @return Returns ArrayList of VirtualDiskBlocks with the contents of the file.
 	 */
-	public static ArrayList<VirtualDiskBlock> getFileContentToVDBs(File file, int blockSize) {
+	public static ArrayList<VirtualDiskBlock> setFileContentToVDBs(File file, int blockSize) {
 		
 		try {
 			ArrayList<VirtualDiskBlock> vdbArray = new ArrayList<>();
