@@ -1,5 +1,10 @@
 package diskUtilities;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+
 /**
  * Some utility methods to copy/get int values, byte values and char values
  * to/from VirtualDiskBlock or array of bytes...
@@ -96,6 +101,41 @@ public class DiskUtils {
 	public static char getCharFromBytesArray(byte[] b, int index) { 
 		return (char) b[index]; 
 	}	
+	
+	/**
+	 * Reads the contents of a file. It separates the content into VirtualDiskBlocks, 
+	 * while leaving 4 bytes for the integer which makes reference to the next data block.
+	 * @param file File to be read.
+	 * @return Returns ArrayList of VirtualDiskBlocks with the contents of the file.
+	 */
+	public static ArrayList<VirtualDiskBlock> getFileContentToVDBs(File file, int blockSize) {
+		
+		try {
+			ArrayList<VirtualDiskBlock> vdbArray = new ArrayList<>();
+			RandomAccessFile fileToRead = new RandomAccessFile(file, "w"); // Create random access file to read data.
+			double fileSize = (double) fileToRead.length();  // Size of the file in bytes.
+			int usableBytes = blockSize - 4;  // Amount of bytes for the file content (-4 to reserve space for integer)
+			int numOfBlocks =  (int) Math.ceil(fileSize / usableBytes); // Amount of blocks needed to copy file.
+			
+			fileToRead.seek(0);
+			for (int i=0; i < numOfBlocks; i++) {
+				VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
+				for (int j=0; j < usableBytes; j++) {
+					vdb.setElement(j, fileToRead.readByte());
+				}
+				vdbArray.add(vdb);
+			}
+			return vdbArray;
+		}
+		catch (IOException e) {
+			System.err.println("Unable to open the external file.");
+			System.exit(1);
+		}	
+		return null;
+	}
+	
+	
+	
 	
 }
 

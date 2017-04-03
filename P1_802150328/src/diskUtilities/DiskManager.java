@@ -186,8 +186,31 @@ public class DiskManager {
 			return;
 		}
 		System.out.println(mountedDiskName+" unmounted successfully.");
+		mountedDiskUnit.shutdown();
 		mountedDiskName = null;
 		mountedDiskUnit = null;
+
+	}
+	/**
+	 * Determines if the is a mounted disk.
+	 * @return Returns true if disk is mounted.
+	 */
+	public static boolean isDiskMounted() {
+		return (mountedDiskName != null && mountedDiskUnit != null);
+	}
+	
+	/**
+	 * Attempts to read a new file into the current directory in the current 
+	 * working disk unit. Wrapper to the FileManager loadFile method.
+	 * @param extFile Name of the file to read
+	 * @param newFile Name of the new file
+	 */
+	public static void loadFile(String extFile, String newFile) {
+		if (!isDiskMounted()) {
+			System.out.println("Cannot load file. No disk is mounted.");
+			return;
+		}
+		FileManager.loadFile(extFile, newFile);
 		
 	}
 
