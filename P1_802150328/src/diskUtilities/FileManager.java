@@ -33,12 +33,16 @@ public class FileManager {
 		int blockSize = disk.getBlockSize();
 		ArrayList<VirtualDiskBlock> vbdArray = DiskUtils.getFileContentToVDBs(fileToRead, blockSize);
 		
+		// Verify if File already exists.
+		// TODO: Implemenent verifying if file already exists.
+		
 		// Byte position of the next free space to write the filename inside the directory.
 		int rootBlockNum = getDataBlockFromINode(disk, 0, blockSize);
-		ArrayList<Integer> fileNameBytePos = getFreePosInDirectory(disk, rootBlockNum, blockSize);
+		ArrayList<Integer> newFileInRoot = getFreePosInDirectory(disk, rootBlockNum, blockSize);
 		
 		// Write file name inside root and assign a free i-node to reference it.
-		
+		// TODO: Get the free node.
+		 
 		
 	}
 	/**
