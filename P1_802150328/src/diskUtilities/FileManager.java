@@ -34,7 +34,7 @@ public class FileManager {
 		// Place file content inside an ArrayList of VirtualDiskBlock
 		DiskUnit disk = DiskManager.mountedDiskUnit;
 		int blockSize = disk.getBlockSize();
-		ArrayList<VirtualDiskBlock> vbdArray = DiskUtils.setFileContentToVDBs(fileToRead, blockSize);
+		ArrayList<VirtualDiskBlock> extFileArrayList = DiskUtils.setFileContentToVDBs(fileToRead, blockSize);
 		
 		// Block Number of the root directory
 		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0);
@@ -46,7 +46,6 @@ public class FileManager {
 			// TODO: If found the file erase the foundFile and create it with new content.
 		}
 		else { // Create the new file.
-			
 			// Write new file into root directory
 			int INodeRef = writeNewFileIntoDirectory(disk, file, rootBlockNum); // Returns the iNode reference.
 			// Enter the iNode and assign a free block
@@ -54,8 +53,8 @@ public class FileManager {
 			int freeBN = FreeBlockManager.getFreeBN(disk);
 			// Set data block in i-node to the free block 
 			INodeManager.setDataBlockToINode(disk, INodeRef, freeBN);
-			// TODO: Write file into the free block\
-			
+			// Write file into the free block
+			writeNewFileIntoBlock(disk, freeBN, extFileArrayList);
 		}
 		
 	}
@@ -145,6 +144,31 @@ public class FileManager {
 		return null;
 	}
 	
+	/**
+	 * Returns an ArrayList with all the block numbers of a file or directory.
+	 * @param d DiskUnit to be used.
+	 * @param firstFileBlockNum First block number of the file
+	 * @return
+	 */
+	private static ArrayList<Integer> allFileBlockNums(DiskUnit d, int firstFileBlockNum) {
+		
+		int blockSize = d.getBlockSize();
+		int lastInt = blockSize - 4;
+		ArrayList<Integer> dirBlockNums = new ArrayList<>();
+		
+		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
+		d.read(firstFileBlockNum, vdb);
+		int nextBlockInt = DiskUtils.getIntFromBlock(vdb, lastInt); // Read the last 4 bytes in the block
+		dirBlockNums.add(firstFileBlockNum);
+		
+		while (nextBlockInt != 0) {
+			dirBlockNums.add(nextBlockInt);
+			vdb = new VirtualDiskBlock(blockSize);
+			d.read(nextBlockInt, vdb);
+			nextBlockInt = DiskUtils.getIntFromBlock(vdb, lastInt);
+		}
+		return dirBlockNums;
+	}
 	
 	/**
 	 * Write the file name and i-node reference into a directory.
@@ -195,29 +219,26 @@ public class FileManager {
 	}
 	
 	/**
-	 * Returns an ArrayList with all the block numbers of a file or directory.
-	 * @param d DiskUnit to be used.
-	 * @param firstFileBlockNum First block number of the file
-	 * @return
+	 * Writes the new file into the disk unit.
+	 * @param d
+	 * @param firstFreeBlock
+	 * @param vdbArray
 	 */
-	private static ArrayList<Integer> allFileBlockNums(DiskUnit d, int firstFileBlockNum) {
+	public static void writeNewFileIntoBlock(DiskUnit d, int firstFreeBlock, ArrayList<VirtualDiskBlock> vdbArray) {
 		
-		int blockSize = d.getBlockSize();
-		int lastInt = blockSize - 4;
-		ArrayList<Integer> dirBlockNums = new ArrayList<>();
+		VirtualDiskBlock vdb = vdbArray.get(0);  // Get the VirtualDiskBlock from the ArrayList
+		int nextFreeBlock = FreeBlockManager.getFreeBN(d); // Look for a free block
+		DiskUtils.copyIntToBlock(vdb, vdb.getCapacity()-4, nextFreeBlock);  // Write free block number into last 4-bytes of block
+		d.write(firstFreeBlock, vdb);   // Write virtual disk block into disk 
 		
-		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
-		d.read(firstFileBlockNum, vdb);
-		int nextBlockInt = DiskUtils.getIntFromBlock(vdb, lastInt); // Read the last 4 bytes in the block
-		dirBlockNums.add(firstFileBlockNum);
-		
-		while (nextBlockInt != 0) {
-			dirBlockNums.add(nextBlockInt);
-			vdb = new VirtualDiskBlock(blockSize);
-			d.read(nextBlockInt, vdb);
-			nextBlockInt = DiskUtils.getIntFromBlock(vdb, lastInt);
+		for (int i=1; i<vdbArray.size(); i++) {
+			int freeBlock = nextFreeBlock;  // Save the next block, in order to write in that block
+			vdb = vdbArray.get(i);
+			nextFreeBlock = FreeBlockManager.getFreeBN(d);  // Look for a free block
+			DiskUtils.copyIntToBlock(vdb, vdb.getCapacity()-4, nextFreeBlock);  // Write free block number into last 4-bytes of block
+			d.write(freeBlock, vdb);  // Write virtual disk block into disk 
 		}
-		return dirBlockNums;
+		
 	}
 		
 	
