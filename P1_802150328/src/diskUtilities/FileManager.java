@@ -25,9 +25,11 @@ public class FileManager {
 	 */
 	public static void loadFile(String extFile, String file) {
 		
+		extFile += ".txt"; // Test
 		File fileToRead = new File(extFile); // file to read from
 		if (!fileToRead.exists()) {
 			System.out.println(extFile+": No such file.");
+			System.out.println(fileToRead.getAbsolutePath());
 			return;
 		}	
 		//File newFile = new File(file);  // file to copy into inside the disk unit
@@ -95,32 +97,37 @@ public class FileManager {
 	/**
 	 * Provides ArrayList with block number in first index and free byte position in second index.
 	 * @param d DiskUnit in use
-	 * @param blockNum Number of data block
+	 * @param blockNum Number of data block of the directory
 	 * @param blockSize Bytes per block
 	 * @return ArrayList with block number in first index and free byte position in second index.
 	 */
-	public static ArrayList<Integer> getFreePosInDirectory(DiskUnit d, int blockNum, int blockSize) {
+	public static ArrayList<Integer> getFreePosInDirectory(DiskUnit d, int firstDirBlockNum, int blockSize) {
 		
 		int usableBytes = blockSize - 4;
 		int filesPerBlock = usableBytes / 24;
+		ArrayList<Integer> freeDirArray = new ArrayList<>(); // Holds the free byte position to write into 
 		
-		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
+		ArrayList<Integer> dirBlockNums = allFileBlockNums(d, firstDirBlockNum);
 		
-		int nextBlockInt = DiskUtils.getIntFromBlock(vdb, usableBytes); // Read the last 4 bytes in the block
-		
-		if ( nextBlockInt == 0) {
-			for (int i=1; i <= filesPerBlock; i++) {
-				int iNodeIdx = DiskUtils.getIntFromBlock(vdb, (i*24)-4); // i-node index inside the directory, after the filename
-				if (iNodeIdx == 0) {  // byte position = blockNum*blockSize+((i*24)-24)
-					ArrayList<Integer> freeDirArray = new ArrayList<>();
-					int bytePos = (i*24)-24;
-					freeDirArray.add(blockNum);
-					freeDirArray.add(bytePos);
-					return freeDirArray;
-				}
+		int blockNum = dirBlockNums.get(dirBlockNums.size()-1); // The last block number in the list
+		VirtualDiskBlock lastDataBlock = DiskUtils.copyBlockToVDB(d, blockNum); // last data block in the directory
+		for (int i=1; i <= filesPerBlock; i++) {
+			int iNodeIdx = DiskUtils.getIntFromBlock(lastDataBlock, (i*24)-4); // i-node index inside the directory, after the filename
+			if (iNodeIdx < 1 || iNodeIdx > d.getiNodeNum()) {  // No reference to an iNode. byte position = blockNum*blockSize+((i*24)-24)
+				int bytePos = (i*24)-24;
+				freeDirArray.add(blockNum);
+				freeDirArray.add(bytePos);
 			}
 		}
-		return getFreePosInDirectory(d, nextBlockInt, blockSize);
+		if (freeDirArray.isEmpty()) {
+			int nextFreeBlock = FreeBlockManager.getFreeBN(d);
+			DiskUtils.copyIntToBlock(lastDataBlock, usableBytes, nextFreeBlock); // Copy new data block into last 4 bytes
+			d.write(blockNum, lastDataBlock); 	// Write the next block number into the block on the disk
+			freeDirArray.add(nextFreeBlock); 	// Block number to write into
+			freeDirArray.add(0);   // Byte position to use 
+		}
+			
+		return freeDirArray;
 	}
 	
 	/**
@@ -182,13 +189,13 @@ public class FileManager {
 	 * Returns an ArrayList with all the block numbers of a file or directory.
 	 * @param d DiskUnit to be used.
 	 * @param firstFileBlockNum First block number of the file
-	 * @return
+	 * @return Returns an ArrayList with all the block numbers of a file or directory.
 	 */
 	private static ArrayList<Integer> allFileBlockNums(DiskUnit d, int firstFileBlockNum) {
 		
 		int blockSize = d.getBlockSize();
 		int lastInt = blockSize - 4;
-		ArrayList<Integer> dirBlockNums = new ArrayList<>();
+		ArrayList<Integer> dirBlockNums = new ArrayList<>(); 
 		
 		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
 		d.read(firstFileBlockNum, vdb);

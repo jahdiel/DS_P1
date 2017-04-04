@@ -21,7 +21,7 @@ public class DiskUnit implements DiskUnitInterface{
 	
 	// the file representing the simulated  disk, where all the disk blocks
 	// are stored
-	private RandomAccessFile disk;
+	public RandomAccessFile disk;
 
 	// the constructor -- PRIVATE
 	/**
