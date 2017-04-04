@@ -42,8 +42,19 @@ public class FileManager {
 		// Verify if File already exists.
 		ArrayList<Integer> foundFile = findFileInDir(disk, file, rootBlockNum);
 		 
-		if (foundFile != null) { // If found the file erase the foundFile and create it with new content.
+		if (foundFile != null) { // If found the file erases the foundFile and creates it with new content.
 			// TODO: If found the file erase the foundFile and create it with new content.
+			VirtualDiskBlock foundFileBlock = DiskUtils.copyBlockToVDB(disk, foundFile.get(0));
+			int fileBytePos = foundFile.get(1);
+			// Get iNode reference to that file 
+			int iNodeRef = DiskUtils.getIntFromBlock(foundFileBlock, fileBytePos+20); // Reads the integer right after the filename, which is the iNode ref
+			int fileDataBlock = INodeManager.getDataBlockFromINode(disk, iNodeRef);  // Data block from the i-node
+			
+			// Delete file from disk
+			deleteFileFromDisk(disk, fileDataBlock);
+			// Write new file in place of the older one
+			writeNewFileIntoDisk(disk, fileDataBlock, extFileArrayList);
+			
 		}
 		else { // Create the new file.
 			// Write new file into root directory
@@ -54,7 +65,7 @@ public class FileManager {
 			// Set data block in i-node to the free block 
 			INodeManager.setDataBlockToINode(disk, INodeRef, freeBN);
 			// Write file into the free block
-			writeNewFileIntoBlock(disk, freeBN, extFileArrayList);
+			writeNewFileIntoDisk(disk, freeBN, extFileArrayList);
 		}
 		
 	}
@@ -224,7 +235,7 @@ public class FileManager {
 	 * @param firstFreeBlock
 	 * @param vdbArray
 	 */
-	public static void writeNewFileIntoBlock(DiskUnit d, int firstFreeBlock, ArrayList<VirtualDiskBlock> vdbArray) {
+	private static void writeNewFileIntoDisk(DiskUnit d, int firstFreeBlock, ArrayList<VirtualDiskBlock> vdbArray) {
 		
 		VirtualDiskBlock vdb = vdbArray.get(0);  // Get the VirtualDiskBlock from the ArrayList
 		int nextFreeBlock = FreeBlockManager.getFreeBN(d); // Look for a free block
@@ -238,6 +249,35 @@ public class FileManager {
 			DiskUtils.copyIntToBlock(vdb, vdb.getCapacity()-4, nextFreeBlock);  // Write free block number into last 4-bytes of block
 			d.write(freeBlock, vdb);  // Write virtual disk block into disk 
 		}
+		
+	}
+	/**
+	 * Deletes a file from the disk by wiping its data blocks.
+	 * @param d DiskUnit in use
+	 * @param firstFreeBlock Number of the first data block in the file.
+	 */
+	private static void deleteFileFromDisk(DiskUnit d, int firstFreeBlock) {
+		
+		ArrayList<Integer> fileBlockNums = allFileBlockNums(d, firstFreeBlock);
+		
+		for (Integer blockNum : fileBlockNums) {
+			VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
+			clearDiskBlock(d, blockNum, vdb);         // Clear the block
+			FreeBlockManager.registerFB(d, blockNum); // register free block to the free block collection. 
+		}
+	}
+	/**
+	 * Clears a block by setting all its bytes to zero.
+	 * @param d
+	 * @param blockNum
+	 * @param vdb
+	 */
+	private static void clearDiskBlock(DiskUnit d, int blockNum, VirtualDiskBlock vdb) {
+		
+		for (int i=0; i<vdb.getCapacity(); i++) {
+			vdb.setElement(i, (byte) 0); // set every byte to 0 in the block
+		}
+		d.write(blockNum, vdb); // Write the wiped block into the disk.
 		
 	}
 		
