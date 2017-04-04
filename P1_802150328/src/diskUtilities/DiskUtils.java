@@ -103,6 +103,21 @@ public class DiskUtils {
 	}	
 	
 	/**
+	 * Copies the contents of a disk block into a Virtual Disk Block
+	 * @param d DiskUnit
+	 * @param blockSize Bytes in the Block. 
+	 * Needs to be the same as the amount of bytes per block of the disk blocks.
+	 * @param blockNum Index of disk block to copy.
+	 * @return
+	 */
+	public static VirtualDiskBlock copyBlockToVDB(DiskUnit d, int blockNum) {
+		VirtualDiskBlock vdb = new VirtualDiskBlock(d.getBlockSize());
+		d.read(blockNum, vdb);
+		
+		return vdb;
+	}
+	
+	/**
 	 * Reads the contents of a file. It separates the content into VirtualDiskBlocks, 
 	 * while leaving 4 bytes for the integer which makes reference to the next data block.
 	 * @param file File to be read.
@@ -134,6 +149,22 @@ public class DiskUtils {
 		return null;
 	}
 	
+	/**
+	 * Format file strings to be a 20 byte string.
+	 * @param file Filename to format.
+	 * @return Formatted string
+	 */
+	public static String formatFileName(String file) throws IllegalArgumentException {
+		
+		if (file.length() > 20)
+			throw new IllegalArgumentException("Filename is greater than 20 characters.");
+			
+		int remainingChars = 20 - file.length();
+		for (int i=0; i < remainingChars; i++) {
+			file += " ";
+		}
+		return file;
+	}
 	
 	
 	

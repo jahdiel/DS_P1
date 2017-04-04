@@ -32,8 +32,9 @@ public class INodeManager {
 	 * @param blockSize
 	 * @return
 	 */
-	public static int getDataBlockFromINode(DiskUnit d, int iNodeIndex, int blockSize) {
+	public static int getDataBlockFromINode(DiskUnit d, int iNodeIndex) {
 		
+		int blockSize = d.getBlockSize();
 		ArrayList<Integer> iNodeInfo = getINodePos(iNodeIndex, blockSize);
 		int iNodeBlockNum = iNodeInfo.get(0); // get blockNum of the iNode 
 		int iNodeBytePos = iNodeInfo.get(1);  // get iNode byte position
@@ -44,12 +45,32 @@ public class INodeManager {
 	}
 	
 	/**
+	 * Sets the first data block from an i-node using its index.
+	 * @param d
+	 * @param iNodeIndex
+	 * @param blockSize
+	 * @return
+	 */
+	public static void setDataBlockToINode(DiskUnit d, int iNodeIndex, int newDataBlock) {
+		
+		int blockSize = d.getBlockSize();
+		ArrayList<Integer> iNodeInfo = getINodePos(iNodeIndex, blockSize);
+		int iNodeBlockNum = iNodeInfo.get(0); // get blockNum of the iNode 
+		int iNodeBytePos = iNodeInfo.get(1);  // get iNode byte position
+		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
+		d.read(iNodeBlockNum, vdb);
+		
+		DiskUtils.copyIntToBlock(vdb, iNodeBytePos, newDataBlock);
+		d.write(iNodeBlockNum, vdb);
+	}
+	
+	/**
 	 * Gets the next free i-node.
 	 * @return Index of the next free i-node
 	 */
 	public static int getFreeINode(DiskUnit d) {
 		int freeINodeIdx = d.getFirstFreeINode();
-		int nextFreeINodeIdx = getDataBlockFromINode(d, freeINodeIdx, d.getBlockSize());
+		int nextFreeINodeIdx = getDataBlockFromINode(d, freeINodeIdx);
 		d.setFirstFreeINode(nextFreeINodeIdx);
 		
 		return freeINodeIdx;

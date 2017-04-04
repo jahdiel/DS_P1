@@ -55,21 +55,6 @@ public class DiskManager {
 	}
 	
 	/**
-	 * Copies the contents of a disk block into a Virtual Disk Block
-	 * @param d DiskUnit
-	 * @param blockSize Bytes in the Block. 
-	 * Needs to be the same as the amount of bytes per block of the disk blocks.
-	 * @param blockNum Index of disk block to copy.
-	 * @return
-	 */
-	public static VirtualDiskBlock copyBlockToVDB(DiskUnit d, int blockSize, int blockNum) {
-		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
-		d.read(blockNum, vdb);
-		
-		return vdb;
-	}
-	
-	/**
 	 * Initializes the free block structure. In the beginning all data blocks
 	 * are part of the structure.
 	 * @param d DiskUnit to initialize its free blocks (all data blocks)
@@ -94,7 +79,7 @@ public class DiskManager {
 		// Set i-node 0 to reference root
 		int rootINodePos = 1;   // Index of the root directory i-node 
 		// Copy the first i-node block into the Virtual Disk Block
-		VirtualDiskBlock firstBlockRef = copyBlockToVDB(d, blockSize, rootINodePos);  
+		VirtualDiskBlock firstBlockRef = DiskUtils.copyBlockToVDB(d, rootINodePos);  
 		// Write in the i-node 0 the reference to the root directory in the data blocks
 		// and set i-node type to directory
 		DiskUtils.copyIntToBlock(firstBlockRef, 0, rootDataBlock);

@@ -3,6 +3,8 @@ package diskUtilities;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import diskUnitExceptions.FullDiskException;
+
 /**
  * Class for managing the free disk blocks in the unit.
  * Works as a tree-like structure. 
@@ -31,10 +33,31 @@ public class FreeBlockManager {
 	
 	/**
 	 * Obtains the next free block in the DiskUnit.
+	 * @param d DiskUnit to be used
 	 * @return Returns Block Number of free Block
 	 */
-	public int getFreeBN() {
-		return 0;
+	public static int getFreeBN(DiskUnit d) throws FullDiskException {
+		int INTEGERS_IN_BLOCK = d.getBlockSize() / 4;
+		int firstFLB = d.getFirstDataBlock();
+		int flIndex = d.getNextFreeBlock();
+		int bn;
+		
+		if (firstFLB == 0)
+			throw new FullDiskException("Disk is full.");
+		// disk has space
+		if (flIndex != 0) {
+			bn = getIntInsideBlock(d, firstFLB, flIndex);
+			flIndex--;
+			d.setNextFreeBlock(flIndex);
+		} else {   // the current root node in the tree is the one to be returned
+			bn = firstFLB;
+			firstFLB = getIntInsideBlock(d, firstFLB, 0);
+			d.setFirstDataBlock(firstFLB);
+			flIndex = INTEGERS_IN_BLOCK-1;
+			d.setNextFreeBlock(flIndex);
+		}
+		
+		return bn;  // the index of the free block that is taken
 	}
 	
 	/**
@@ -71,10 +94,27 @@ public class FreeBlockManager {
 	 * @param value
 	 */
 	public static void setIntInsideBlock(DiskUnit d, int blockNum, int index, int value) {
-		VirtualDiskBlock vdb = DiskManager.copyBlockToVDB(d, d.getBlockSize(), blockNum);
-		DiskUtils.copyIntToBlock(vdb, 4*index, value); // Copies integer into the different possible indexes inside VDB
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
+		DiskUtils.copyIntToBlock(vdb, 4*index, value); // Copies integer into the different possible integer indexes inside VDB
 		d.write(blockNum, vdb);
 	}
+	
+	/**
+	 * Gets an integer from the provided index inside a free data block.
+	 * Equivalent to value = block[index];
+	 * @param blockNum
+	 * @param index
+	 * @param value
+	 */
+	public static int getIntInsideBlock(DiskUnit d, int blockNum, int index) {
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
+		int intInsideBlock = DiskUtils.getIntFromBlock(vdb, 4*index); // Gets integer from the different possible integer indexes inside VDB
+		DiskUtils.copyIntToBlock(vdb, 4*index, 0); // Change the reference to the free block into zero.
+		d.write(blockNum, vdb); // Write the vdb with zero in the position of the retrieved data block number.
+		
+		return intInsideBlock;
+	}
+	
 	
 	/**
 	 * 

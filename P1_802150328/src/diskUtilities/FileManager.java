@@ -28,26 +28,32 @@ public class FileManager {
 		}	
 		File newFile = new File(file);  // file to copy into inside the disk unit
 		
+		// Format file string to fit 20 bytes
+		file = DiskUtils.formatFileName(file);
+		
 		// Place file content inside an ArrayList of VirtualDiskBlock
 		DiskUnit disk = DiskManager.mountedDiskUnit;
 		int blockSize = disk.getBlockSize();
 		ArrayList<VirtualDiskBlock> vbdArray = DiskUtils.setFileContentToVDBs(fileToRead, blockSize);
 		
 		// Block Number of the root directory
-		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0, blockSize);
+		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0);
 		
 		// Verify if File already exists.
-		// TODO: Implemenent verifying if file already exists.
 		ArrayList<Integer> foundFile = findFileInDir(disk, file, rootBlockNum);
-		
-		if (foundFile != null) {
-			// TODO: Erase the foundFile and create it with new content.
+		 
+		if (foundFile != null) { // If found the file erase the foundFile and create it with new content.
+			// TODO: If found the file erase the foundFile and create it with new content.
 		}
-		// Write new file into the directory. 
-		else {
+		else { // Create the new file.
+			
 			// Write new file into root directory
-			writeNewFileIntoDirectory(disk, file, rootBlockNum);
-			// TODO: enter the iNode and assign a free block
+			int INodeRef = writeNewFileIntoDirectory(disk, file, rootBlockNum); // Returns the iNode reference.
+			// Enter the iNode and assign a free block
+			// Get free block number
+			int freeBN = FreeBlockManager.getFreeBN(disk);
+			// Set data block in i-node to the free block 
+			INodeManager.setDataBlockToINode(disk, INodeRef, freeBN);
 			// TODO: Write file into the free block\
 			
 		}
@@ -65,8 +71,8 @@ public class FileManager {
 		int usableBytes = blockSize - 4;
 		int filesPerBlock = usableBytes / 24;
 		
-		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
-		d.read(blockNum, vdb);
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
+		
 		int nextBlockInt = DiskUtils.getIntFromBlock(vdb, usableBytes); // Read the last 4 bytes in the block
 		
 		if ( nextBlockInt == 0) {
@@ -97,8 +103,7 @@ public class FileManager {
 
 		ArrayList<Integer> dirBlockNums = allFileBlockNums(d, dirBlockNum);
 		for (Integer blockNum : dirBlockNums) {
-			VirtualDiskBlock vdb = new VirtualDiskBlock(d.getBlockSize());
-			d.read(blockNum, vdb);
+			VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
 			Integer bytePos = findFileInBlock(vdb, file); // Find file in the block.
 			if (bytePos != null) {
 				ArrayList<Integer> foundFileInfo = new ArrayList<>();
@@ -144,25 +149,29 @@ public class FileManager {
 	/**
 	 * Write the file name and i-node reference into a directory.
 	 * Writes file name right after the last file name in directory.
-	 * @param d
-	 * @param file
-	 * @param blockNum
-	 * @param blockSize
-	 * @throws IllegalArgumentException
+	 * @param d DiskUnit in use.
+	 * @param file New file to write into directory.
+	 * @param blockNum Number of the block to write in.
+	 * @param blockSize Bytes per block.
+	 * @throws IllegalArgumentException Thrown if filename length not 20 characters long.
+	 * @return Returns reference to the i-node of the new file.
 	 */
-	public static void writeNewFileIntoDirectory(DiskUnit d, String file, int blockNum) 
+	public static int  writeNewFileIntoDirectory(DiskUnit d, String file, int blockNum) 
 			throws IllegalArgumentException {
 		
 		int blockSize = d.getBlockSize();
+		
 		// New file string into char array.
-		// TODO: Format string to be of size 20 bytes
 		char[] fileCharArray = file.toCharArray();
-		if (fileCharArray.length > 20) {
-			throw new IllegalArgumentException("File name is greater than 20 characters.");
+		if (fileCharArray.length != 20) {
+			throw new IllegalArgumentException("File name is not 20 characters.");
 		}
 			
 		// Get free byte position in directory
 		ArrayList<Integer> newFileInRoot = getFreePosInDirectory(d, blockNum, blockSize);
+		
+		// TODO: Verify file fits into new block;
+		
 		// Write file name inside root and assign a free i-node to reference it.
 		// Obtain free i-node index
 		int iNodeRef = INodeManager.getFreeINode(d);
@@ -171,16 +180,18 @@ public class FileManager {
 		int newFileBytePos = newFileInRoot.get(1);
 		
 		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
-		d.read(blockNum, vdb);
+		d.read(newFileBlockNum, vdb);
 		
 		// Write file name inside the block
 		for (int i=0; i<fileCharArray.length; i++) {
-			DiskUtils.copyCharToBlock(vdb, newFileBytePos, fileCharArray[i]);
+			DiskUtils.copyCharToBlock(vdb, newFileBytePos+i, fileCharArray[i]);
 		}
 		// Copy i-node reference into the directory.
 		DiskUtils.copyIntToBlock(vdb, newFileBytePos+20, iNodeRef);
 		// Write the Virtual block back into the disk unit.
 		d.write(newFileBlockNum, vdb);
+		
+		return iNodeRef; // Returns reference to the i-node of the new file.
 	}
 	
 	/**
