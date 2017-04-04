@@ -226,8 +226,7 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
-			// TODO: Finish
+			DiskManager.listDir();
 			return resultsList; 
 		}
 	}

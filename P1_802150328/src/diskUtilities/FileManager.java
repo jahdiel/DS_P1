@@ -95,6 +95,22 @@ public class FileManager {
 		
 	}
 	/**
+	 * List files in directory.
+	 */
+	public static void listDir() {
+		DiskUnit disk = DiskManager.mountedDiskUnit;
+		
+		// Write the title
+		System.out.println("Filename:           Size (Bytes)");
+		System.out.println("-------------------------------------");
+		// Block Number of the root directory
+		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0);
+		printFilesFromDir(disk, rootBlockNum);
+		
+		System.out.println();
+	}
+	
+	/**
 	 * Provides ArrayList with block number in first index and free byte position in second index.
 	 * @param d DiskUnit in use
 	 * @param blockNum Number of data block of the directory
@@ -152,7 +168,6 @@ public class FileManager {
 				return foundFileInfo;
 			}
 		}
-		
 		return null;
 	}
 	/**
@@ -183,6 +198,38 @@ public class FileManager {
 			}	
 		}
 		return null;
+	}
+	/**
+	 * List of strings with information about the files in a directory block.
+	 * @param d DiskUnit in use.
+	 * @param vdb Virtual block of a directory.
+	 * @return Returns list of strings with information about the files in a directory block.
+	 */
+	private static ArrayList<String> filesInDirBlock(DiskUnit d, VirtualDiskBlock vdb) {
+		
+		int usableBytes = vdb.getCapacity() - 4;
+		int filesPerBlock = usableBytes / 24;
+		ArrayList<String> filesInDir = new ArrayList<>();
+		
+		for (int i=1; i <= filesPerBlock; i++) {
+			
+			int iNodeIdx = DiskUtils.getIntFromBlock(vdb, (i*24)-4); // i-node index inside the directory, after the filename
+			if (iNodeIdx == 0)   // If no reference to i-node is found, no file is stored. Byte position = blockNum*blockSize+((i*24)-24)
+				break;
+			
+			char[] fileCharArray = new char[20];
+			int fileBytePos = (i*24) - 24;   // Starting byte position of the file name
+			for (int j=0; j<20; j++) {
+				fileCharArray[j] = DiskUtils.getCharFromBlock(vdb, (fileBytePos+j));
+			}
+			String filename = new String(fileCharArray);
+			int iNodeRef = DiskUtils.getIntFromBlock(vdb, fileBytePos+20);
+			String filesize = Integer.toString(INodeManager.getSizeFromINode(d, iNodeRef));
+			filename += " "+filesize;
+			filesInDir.add(filename);
+			
+		}
+		return filesInDir;
 	}
 	
 	/**
@@ -224,6 +271,7 @@ public class FileManager {
 	public static int  writeNewFileIntoDirectory(DiskUnit d, String file, int blockNum) 
 			throws IllegalArgumentException {
 		
+		// Blocksize of the blocks
 		int blockSize = d.getBlockSize();
 		
 		// New file string into char array.
@@ -259,6 +307,19 @@ public class FileManager {
 		return iNodeRef; // Returns reference to the i-node of the new file.
 	}
 	
+	private static void printFilesFromDir(DiskUnit d, int dirBlockNum) {
+		
+		ArrayList<Integer> dirBlockNums = allFileBlockNums(d, dirBlockNum);
+		
+		for (Integer blockNum : dirBlockNums) {		
+			VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
+			ArrayList<String> files = filesInDirBlock(d, vdb);
+			for (String file : files) {
+				System.out.println(file);
+			}
+		}
+		
+	}
 	/**
 	 * Writes the new file into the disk unit.
 	 * @param d

@@ -53,7 +53,6 @@ public class DiskManager {
 		
 		d.shutdown(); // Shutdown the disk
 	}
-	
 	/**
 	 * Initializes the free block structure. In the beginning all data blocks
 	 * are part of the structure.
@@ -196,11 +195,15 @@ public class DiskManager {
 			return;
 		}
 		FileManager.loadFile(extFile, newFile);
-		
 	}
 
-	
-	
+	public static void listDir() {
+		if (!isDiskMounted()) {
+			System.out.println("Cannot list directory. No disk is mounted.");
+			return;
+		}
+		FileManager.listDir();
+	}
 	
 	
 	
