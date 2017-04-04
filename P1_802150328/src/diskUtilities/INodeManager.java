@@ -57,11 +57,47 @@ public class INodeManager {
 		ArrayList<Integer> iNodeInfo = getINodePos(iNodeIndex, blockSize);
 		int iNodeBlockNum = iNodeInfo.get(0); // get blockNum of the iNode 
 		int iNodeBytePos = iNodeInfo.get(1);  // get iNode byte position
-		VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
-		d.read(iNodeBlockNum, vdb);
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, iNodeBlockNum);
 		
 		DiskUtils.copyIntToBlock(vdb, iNodeBytePos, newDataBlock);
 		d.write(iNodeBlockNum, vdb);
+	}
+	
+	/**
+	 * Gets the size of a file into is i-node
+	 * @param d DiskUnit in use
+	 * @param iNodeIndex Index of the INode to modify
+	 * @return Returns size of the file the i-node makes reference to.
+	 */
+	public static int getSizeFromINode(DiskUnit d, int iNodeIndex) {
+		
+		int blockSize = d.getBlockSize();
+		ArrayList<Integer> iNodeInfo = getINodePos(iNodeIndex, blockSize);
+		int iNodeBlockNum = iNodeInfo.get(0); // get blockNum of the iNode 
+		int iNodeBytePos = iNodeInfo.get(1);  // get iNode byte position
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, iNodeBlockNum);
+		
+		// Get size in the next 4 bytes after the beginning of the i-node byte position
+		return DiskUtils.getIntFromBlock(vdb, iNodeBytePos+4);
+		
+	}
+	/**
+	 * Sets the size of a file into is i-node
+	 * @param d DiskUnit in use
+	 * @param iNodeIndex Index of the INode to modify
+	 * @param sizeValue Size of the file which the i-node makes reference to.
+	 */
+	public static void setSizeIntoINode(DiskUnit d, int iNodeIndex, int sizeValue) {
+		
+		int blockSize = d.getBlockSize();
+		ArrayList<Integer> iNodeInfo = getINodePos(iNodeIndex, blockSize);
+		int iNodeBlockNum = iNodeInfo.get(0); // get blockNum of the iNode 
+		int iNodeBytePos = iNodeInfo.get(1);  // get iNode byte position
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, iNodeBlockNum);
+		
+		// Set size in the next 4 bytes after the beginning of the i-node byte position
+		DiskUtils.copyIntToBlock(vdb, iNodeBytePos+4, sizeValue); 
+		d.write(iNodeBlockNum, vdb);  // Write block into disk
 	}
 	
 	/**

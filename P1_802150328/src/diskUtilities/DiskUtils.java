@@ -123,33 +123,32 @@ public class DiskUtils {
 	 * @param file File to be read.
 	 * @return Returns ArrayList of VirtualDiskBlocks with the contents of the file.
 	 */
-	public static ArrayList<VirtualDiskBlock> setFileContentToVDBs(File file, int blockSize) {
+	public static ArrayList<VirtualDiskBlock> setFileContentToVDBs(String file, int blockSize) {
 		
 		try {
+			RandomAccessFile fileToRead = new RandomAccessFile(file, "rw");
 			ArrayList<VirtualDiskBlock> vdbArray = new ArrayList<>();
-			RandomAccessFile fileToRead = new RandomAccessFile(file, "rw"); // Create random access file to read data.
-			double fileSize = (double) fileToRead.length();  // Size of the file in bytes.
-			int usableBytes = blockSize - 4;  // Amount of bytes for the file content (-4 to reserve space for integer)
-			int numOfBlocks =  (int) Math.ceil(fileSize / usableBytes); // Amount of blocks needed to copy file.		
+			double fileToReadSize = (double) fileToRead.length();  // Size of the fileToRead in bytes.
+			int usableBytes = blockSize - 4;  // Amount of bytes for the fileToRead content (-4 to reserve space for integer)
+			int numOfBlocks =  (int) Math.ceil(fileToReadSize / usableBytes); // Amount of blocks needed to copy fileToRead.		
 			int byteCounter = 0; // Counts the bytes read
 			
 			fileToRead.seek(0);
 			for (int i=0; i < numOfBlocks; i++) {
 				VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
 				for (int j=0; j < usableBytes; j++) {
-					if (byteCounter == (int) fileSize)
+					if (byteCounter == (int) fileToReadSize)
 						break;
 					vdb.setElement(j, fileToRead.readByte());	
 					byteCounter++;
 				}
 				vdbArray.add(vdb);
 			}
+			fileToRead.close(); // Close RAF
 			return vdbArray;
 		}
 		catch (IOException e) {
-			System.err.println("Unable to open the external file.");
-			e.printStackTrace();
-			System.exit(1);
+			System.err.println("Unable to open random access file.");
 		}	
 		return null;
 	}
