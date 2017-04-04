@@ -202,9 +202,12 @@ public class SystemCommandsProcessor extends CommandProcessor {
 	private class LoadFileProcessor implements CommandActionHandler { 
 		public ArrayList<String> execute(Command c) { 
 
-			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
-			// TODO: Finish
+			resultsList = new ArrayList<String>();
+			FixedLengthCommand fc = (FixedLengthCommand) c;
+			String name1 = fc.getOperand(1);
+			String name2 = fc.getOperand(2);
+			DiskManager.loadFile(name1, name2);
+		
 			return resultsList; 
 		}
 	}

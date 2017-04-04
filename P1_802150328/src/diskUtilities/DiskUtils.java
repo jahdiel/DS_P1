@@ -127,16 +127,20 @@ public class DiskUtils {
 		
 		try {
 			ArrayList<VirtualDiskBlock> vdbArray = new ArrayList<>();
-			RandomAccessFile fileToRead = new RandomAccessFile(file, "w"); // Create random access file to read data.
+			RandomAccessFile fileToRead = new RandomAccessFile(file, "rw"); // Create random access file to read data.
 			double fileSize = (double) fileToRead.length();  // Size of the file in bytes.
 			int usableBytes = blockSize - 4;  // Amount of bytes for the file content (-4 to reserve space for integer)
-			int numOfBlocks =  (int) Math.ceil(fileSize / usableBytes); // Amount of blocks needed to copy file.
+			int numOfBlocks =  (int) Math.ceil(fileSize / usableBytes); // Amount of blocks needed to copy file.		
+			int byteCounter = 0; // Counts the bytes read
 			
 			fileToRead.seek(0);
 			for (int i=0; i < numOfBlocks; i++) {
 				VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
 				for (int j=0; j < usableBytes; j++) {
-					vdb.setElement(j, fileToRead.readByte());
+					if (byteCounter == (int) fileSize)
+						break;
+					vdb.setElement(j, fileToRead.readByte());	
+					byteCounter++;
 				}
 				vdbArray.add(vdb);
 			}
@@ -144,6 +148,7 @@ public class DiskUtils {
 		}
 		catch (IOException e) {
 			System.err.println("Unable to open the external file.");
+			e.printStackTrace();
 			System.exit(1);
 		}	
 		return null;

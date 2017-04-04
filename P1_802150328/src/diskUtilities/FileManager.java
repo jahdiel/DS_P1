@@ -26,7 +26,9 @@ public class FileManager {
 		if (!fileToRead.exists()) {
 			System.out.println(extFile+": No such file.");
 		}	
-		File newFile = new File(file);  // file to copy into inside the disk unit
+		//File newFile = new File(file);  // file to copy into inside the disk unit
+		
+		// TODO: Verify disk has enough space.
 		
 		// Format file string to fit 20 bytes
 		file = DiskUtils.formatFileName(file);
