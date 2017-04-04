@@ -25,7 +25,7 @@ public class FileManager {
 	 */
 	public static void loadFile(String extFile, String file) {
 		
-		extFile += ".txt"; // Test
+		//extFile += ".txt"; 
 		File fileToRead = new File(extFile); // file to read from
 		if (!fileToRead.exists()) {
 			System.out.println(extFile+": No such file.");
@@ -49,7 +49,7 @@ public class FileManager {
 			rafSize = (int) rafToRead.length();
 			rafToRead.close();
 			// Create random access file to read data.
-			extFileArrayList = DiskUtils.setFileContentToVDBs(extFile, blockSize);
+			extFileArrayList = DiskUtils.setExtFileContentToVDBs(extFile, blockSize);
 			
 		} catch (FileNotFoundException e) {
 			System.err.println("Unable to open external file.");
@@ -65,7 +65,6 @@ public class FileManager {
 		ArrayList<Integer> foundFile = findFileInDir(disk, file, rootBlockNum);
 		 
 		if (foundFile != null) { // If found the file erases the foundFile and creates it with new content.
-			// TODO: If found the file erase the foundFile and create it with new content.
 			VirtualDiskBlock foundFileBlock = DiskUtils.copyBlockToVDB(disk, foundFile.get(0));
 			int fileBytePos = foundFile.get(1);
 			// Get iNode reference to that file 
@@ -95,12 +94,78 @@ public class FileManager {
 		
 	}
 	/**
+	 * Copies one internal file to another internal file. It works similar to the 
+	 * command loadfile, but this time the input file (name given first) is also an 
+	 * internal file that must be a data file in the current directory.
+	 * @param inputFile Internal file to copy from
+	 * @param file Internal file to copy content into
+	 */
+	public static void copyFile(String inputFile, String file) {
+		
+		// Format file strings to fit 20 bytes
+		inputFile = DiskUtils.formatFileName(inputFile);
+		file = DiskUtils.formatFileName(file);
+		// Mounted disk unit 
+		DiskUnit disk = DiskManager.mountedDiskUnit;
+		// Block Number of the root directory
+		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0);
+		// Get input file from root
+		ArrayList<Integer> inputFileInfo = findFileInDir(disk, inputFile, rootBlockNum);
+		if (inputFileInfo == null || inputFileInfo.isEmpty()) {
+			System.out.println("File not found in directory");
+			return;
+		}
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(disk, inputFileInfo.get(0));
+		int inputFileBytePos = inputFileInfo.get(1);   // Starting byte position of the file name
+		// Get data block from i-node
+		int inputINodeRef = DiskUtils.getIntFromBlock(vdb, inputFileBytePos+20);
+		int inputFileSize = INodeManager.getSizeFromINode(disk, inputINodeRef);
+		int inputFileDataBlock = INodeManager.getDataBlockFromINode(disk, inputINodeRef);
+		
+		// Get content of input file
+		ArrayList<VirtualDiskBlock> content = DiskUtils.setFileContentToVDBs(disk, inputFileDataBlock);
+		
+		
+		// Verify if File already exists.
+		ArrayList<Integer> foundFile = findFileInDir(disk, file, rootBlockNum);
+
+		if (foundFile != null) { // If found the file erases the foundFile and creates it with new content.
+			VirtualDiskBlock foundFileBlock = DiskUtils.copyBlockToVDB(disk, foundFile.get(0));
+			int fileBytePos = foundFile.get(1);
+			// Get iNode reference to that file 
+			int iNodeRef = DiskUtils.getIntFromBlock(foundFileBlock, fileBytePos+20); // Reads the integer right after the filename, which is the iNode ref
+			int fileDataBlock = INodeManager.getDataBlockFromINode(disk, iNodeRef);  // Data block from the i-node
+			// Set size of file into its i-node
+			INodeManager.setSizeIntoINode(disk, iNodeRef, inputFileSize);
+			// Delete file from disk
+			deleteFileFromDisk(disk, fileDataBlock);
+			// Write new file in place of the older one
+			writeNewFileIntoDisk(disk, fileDataBlock, content);
+
+		}
+		else { // Create the new file.
+			// Write new file into root directory
+			int iNodeRef = writeNewFileIntoDirectory(disk, file, rootBlockNum); // Returns the iNode reference.
+			// Enter the iNode and assign a free block
+			// Get free block number
+			int freeBN = FreeBlockManager.getFreeBN(disk);
+			// Set data block in i-node to the free block 
+			INodeManager.setDataBlockToINode(disk, iNodeRef, freeBN);
+			// Set size in of file into its i-node
+			INodeManager.setSizeIntoINode(disk,iNodeRef, inputFileSize);
+			// Write file into the free block
+			writeNewFileIntoDisk(disk, freeBN, content);
+		}
+		
+	}
+	/**
 	 * List files in directory.
 	 */
 	public static void listDir() {
 		DiskUnit disk = DiskManager.mountedDiskUnit;
 		
 		// Write the title
+		System.out.println();
 		System.out.println("Filename:           Size (Bytes)");
 		System.out.println("-------------------------------------");
 		// Block Number of the root directory
@@ -108,6 +173,37 @@ public class FileManager {
 		printFilesFromDir(disk, rootBlockNum);
 		
 		System.out.println();
+	}
+	/**
+	 * Displays the contents of a file in the current directory.
+	 * @param file Name of file to be displayed.
+	 */
+	public static void catFile(String file) {
+		
+		// Format file string to fit 20 bytes
+		file = DiskUtils.formatFileName(file);
+		// Mounted disk unit 
+		DiskUnit disk = DiskManager.mountedDiskUnit;
+		// Block Number of the root directory
+		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0);
+		// Get file from root
+		ArrayList<Integer> fileInfo = findFileInDir(disk, file, rootBlockNum);
+		if (fileInfo == null || fileInfo.isEmpty()) {
+			System.out.println("File not found in directory");
+			return;
+		}
+		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(disk, fileInfo.get(0));
+		int fileBytePos = fileInfo.get(1);   // Starting byte position of the file name
+		// Get data block from i-node
+		int iNodeRef = DiskUtils.getIntFromBlock(vdb, fileBytePos+20);
+		int fileDataBlock = INodeManager.getDataBlockFromINode(disk, iNodeRef);
+		
+		// Get content from file
+		ArrayList<VirtualDiskBlock> content = DiskUtils.setFileContentToVDBs(disk, fileDataBlock);
+		
+		// Print the file content
+		System.out.println();
+		DiskUtils.printContentOfVDBlocks(content);
 	}
 	
 	/**
@@ -160,7 +256,7 @@ public class FileManager {
 		ArrayList<Integer> dirBlockNums = allFileBlockNums(d, dirBlockNum);
 		for (Integer blockNum : dirBlockNums) {
 			VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
-			Integer bytePos = findFileInBlock(vdb, file); // Find file in the block.
+			Integer bytePos = findFileInDirBlock(vdb, file); // Find file in the block.
 			if (bytePos != null) {
 				ArrayList<Integer> foundFileInfo = new ArrayList<>();
 				foundFileInfo.add(blockNum);   // BlockNum of where the file resides.
@@ -176,7 +272,7 @@ public class FileManager {
 	 * @param vdb
 	 * @return Integer with the byte position of the filename. 
 	 */
-	public static Integer findFileInBlock(VirtualDiskBlock vdb, String file) {
+	public static Integer findFileInDirBlock(VirtualDiskBlock vdb, String file) {
 		
 		int usableBytes = vdb.getCapacity() - 4;
 		int filesPerBlock = usableBytes / 24;
@@ -238,7 +334,7 @@ public class FileManager {
 	 * @param firstFileBlockNum First block number of the file
 	 * @return Returns an ArrayList with all the block numbers of a file or directory.
 	 */
-	private static ArrayList<Integer> allFileBlockNums(DiskUnit d, int firstFileBlockNum) {
+	public static ArrayList<Integer> allFileBlockNums(DiskUnit d, int firstFileBlockNum) {
 		
 		int blockSize = d.getBlockSize();
 		int lastInt = blockSize - 4;
@@ -306,7 +402,11 @@ public class FileManager {
 		
 		return iNodeRef; // Returns reference to the i-node of the new file.
 	}
-	
+	/**
+	 * Prints the filename and file size of all the files in a directory 
+	 * @param d DiskUnit in use
+	 * @param dirBlockNum Number of the first data block of the directory
+	 */
 	private static void printFilesFromDir(DiskUnit d, int dirBlockNum) {
 		
 		ArrayList<Integer> dirBlockNums = allFileBlockNums(d, dirBlockNum);
@@ -318,8 +418,8 @@ public class FileManager {
 				System.out.println(file);
 			}
 		}
-		
 	}
+	
 	/**
 	 * Writes the new file into the disk unit.
 	 * @param d
@@ -384,6 +484,8 @@ public class FileManager {
 		d.write(blockNum, vdb); // Write the wiped block into the disk.
 		
 	}
+	
+	
 		
 	
 	

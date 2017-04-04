@@ -196,7 +196,10 @@ public class DiskManager {
 		}
 		FileManager.loadFile(extFile, newFile);
 	}
-
+	/**
+	 * Lists the files inside the current directory.
+	 * Prints the filename and its size in bytes.
+	 */
 	public static void listDir() {
 		if (!isDiskMounted()) {
 			System.out.println("Cannot list directory. No disk is mounted.");
@@ -205,6 +208,28 @@ public class DiskManager {
 		FileManager.listDir();
 	}
 	
+	public static void catFile(String file) {
+		if (!isDiskMounted()) {
+			System.out.println("Cannot display file. No disk is mounted.");
+			return;
+		}
+		FileManager.catFile(file);
+	}
+	/**
+	 * Copies one internal file to another internal file. It works similar to the 
+	 * command loadfile, but this time the input file (name given first) is also an 
+	 * internal file that must be a data file in the current directory.
+	 * @param inputFile Internal file to copy from
+	 * @param file Internal file to copy content into
+	 */
+	public static void copyFile(String inputFile, String file) {
+		if (!isDiskMounted()) {
+			System.out.println("Cannot copy file. No disk is mounted.");
+			return;
+		}
+		FileManager.copyFile(inputFile, file);
+		
+	}
 	
 	
 	

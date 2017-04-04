@@ -118,12 +118,12 @@ public class DiskUtils {
 	}
 	
 	/**
-	 * Reads the contents of a file. It separates the content into VirtualDiskBlocks, 
+	 * Reads the contents of an external file. It separates the content into VirtualDiskBlocks, 
 	 * while leaving 4 bytes for the integer which makes reference to the next data block.
 	 * @param file File to be read.
 	 * @return Returns ArrayList of VirtualDiskBlocks with the contents of the file.
 	 */
-	public static ArrayList<VirtualDiskBlock> setFileContentToVDBs(String file, int blockSize) {
+	public static ArrayList<VirtualDiskBlock> setExtFileContentToVDBs(String file, int blockSize) {
 		
 		try {
 			RandomAccessFile fileToRead = new RandomAccessFile(file, "rw");
@@ -151,6 +151,47 @@ public class DiskUtils {
 			System.err.println("Unable to open random access file.");
 		}	
 		return null;
+	}
+	/**
+	 * Sets the content of an internal file into an ArrayList of VirtualDiskBlock
+	 * @param d DiskUnit in use.
+	 * @param fileBlockNum First block number of the file.
+	 * @return Returns an ArrayList of VirtualDiskBlock with contents of internal file.
+	 */
+	public static ArrayList<VirtualDiskBlock> setFileContentToVDBs(DiskUnit d, int fileBlockNum) {
+		
+		int blockSize = d.getBlockSize();
+		ArrayList<Integer> fileBlockNums = FileManager.allFileBlockNums(d, fileBlockNum); // ArrayList with the block numbers of the file 
+		
+		ArrayList<VirtualDiskBlock> fileContent = new ArrayList<>(); // To store the VDBs with the content of the file
+		
+		for (Integer blockNum : fileBlockNums) {  // Iterate through the block numbers of the file
+			
+			VirtualDiskBlock vdb = copyBlockToVDB(d, blockNum);
+			copyIntToBlock(vdb, blockSize-4, 0); // Erase the reference to the next block
+			
+			fileContent.add(vdb); // add VDB to the ArrayList
+			
+		}
+		
+		return fileContent;
+		
+	}
+	
+	public static void printContentOfVDBlocks(ArrayList<VirtualDiskBlock> vdBlocks) {
+		
+		String fileString = "";
+		
+		for (VirtualDiskBlock block : vdBlocks) {
+			
+			char[] blockCharArray = new char[block.getCapacity()-4];
+			for (int i=0; i<block.getCapacity()-4; i++) {
+				blockCharArray[i] = getCharFromBlock(block, i);
+			}
+			fileString += new String(blockCharArray);
+		}
+		
+		System.out.println(fileString); // Print the contents of the file
 	}
 	
 	/**

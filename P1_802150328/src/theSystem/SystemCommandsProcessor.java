@@ -43,7 +43,7 @@ public class SystemCommandsProcessor extends CommandProcessor {
 	
 	////////////////////////////////////////////////////////////////
 	// The following are references to objects needed for management 
-	// of data as required by the particular octions of the command-set..
+	// of data as required by the particular actions of the command-set..
 	// The following represents the object that will be capable of
 	// managing the different lists that are created by the system
 	// to be implemented as a lab exercise. 
@@ -115,19 +115,8 @@ public class SystemCommandsProcessor extends CommandProcessor {
 	 *  method inside the "LoginProcessor" class must be a "login" command. 
 	 *
 	 */
-	
-	private class ShutDownProcessor implements CommandActionHandler { 
-		public ArrayList<String> execute(Command c) { 
-
-			resultsList = new ArrayList<String>(); 
-			resultsList.add("SYSTEM IS SHUTTING DOWN!!!!");
-			stopExecution = true;
-			return resultsList; 
-		}
-	}
-	
+	//////////////////////////////////////////////////////////////////////
 	///////////// DATA PROJECT 2 INNER CLASSES ///////////////////////////
-	// eliminate the other classes once these are correctly implemented.
 	//////////////////////////////////////////////////////////////////////
 	
 	private class CreateDiskProcessor implements CommandActionHandler { 
@@ -215,9 +204,11 @@ public class SystemCommandsProcessor extends CommandProcessor {
 	private class CopyFileProcessor implements CommandActionHandler { 
 		public ArrayList<String> execute(Command c) { 
 
-			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
-			// TODO: Finish
+			resultsList = new ArrayList<String>();
+			FixedLengthCommand fc = (FixedLengthCommand) c;
+			String inputFile = fc.getOperand(1);
+			String file = fc.getOperand(2);
+			DiskManager.copyFile(inputFile, file);
 			return resultsList; 
 		}
 	}
@@ -235,143 +226,28 @@ public class SystemCommandsProcessor extends CommandProcessor {
 		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-			resultsList.add("Creates Disk");
-			// TODO: Finish
+			FixedLengthCommand fc = (FixedLengthCommand) c;
+			String filename = fc.getOperand(1);
+			DiskManager.catFile(filename);
+			
 			return resultsList; 
 		}
 	}
 	
-	
-	
-	//////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////
-
-	// classes added for the lab exercise about this project. 
-	private class CreateProcessor implements CommandActionHandler {
-		@Override
-		public ArrayList<String> execute(Command c) {
+	private class ShutDownProcessor implements CommandActionHandler { 
+		public ArrayList<String> execute(Command c) { 
 
 			resultsList = new ArrayList<String>(); 
-
-			VariableLengthCommand vlc = (VariableLengthCommand) c; 
-			String name = vlc.getItemsForOperand(1).get(0);
-
-			//FixedLengthCommand fc = (FixedLengthCommand) c;
-			//String name = fc.getOperand(1); 
-
-			if (!OperandValidatorUtils.isValidName(name))
-				resultsList.add("Invalid name formation: " + name); 
-			else if (listsManager.nameExists(name)) 
-				resultsList.add("Name give is already in use by another list: " + name); 
-			else 
-				listsManager.createNewList(name);
+			resultsList.add("SYSTEM IS SHUTTING DOWN!!!!");
+			stopExecution = true;
 			return resultsList; 
-		} 
-		
-	}
-
-
-	
-	private class ShowListsProcessor implements CommandActionHandler { 
-		public ArrayList<String> execute(Command c) {  
-
-			// command has no operand - nothing is needed from the
-			// command. if it comes here, it is the showall command....
-			resultsList = new ArrayList<String>(); 
-
-			int nLists = listsManager.getNumberOfLists();
-			if (nLists == 0)
-				resultsList.add("There are no lists in the system at this moment."); 
-			else {
-				resultsList.add("Names of the existing lists are: "); 
-				for (int i=0; i<nLists; i++)
-					resultsList.add("\t"+listsManager.getName(i)); 		
-			}
-			return resultsList; 
-		} 
-	}
-
-	private class AppendProcessor implements CommandActionHandler { 
-		public ArrayList<String> execute(Command c) {  
-
-			resultsList = new ArrayList<String>(); 
-
-			FixedLengthCommand fc = (FixedLengthCommand) c;
-
-			// the following needs to be adapted to named lists and the 
-			// usage of the ListsManagerObject ......
-
-			String name = fc.getOperand(1); 
-			int listIndex = listsManager.getListIndex(name); 
-			if (listIndex == -1)
-				resultsList.add("No such list: " + name); 
-			else {
-				int value = Integer.parseInt(fc.getOperand(2)); 
-				listsManager.addElement(listIndex, value);
-			}
-			return resultsList; 
-		} 
-	}
-	
-	// classes added for the lab exercise about this project. 
-	private class ShowAllProcessor implements CommandActionHandler { 
-		public ArrayList<String> execute(Command c) {  
-
-			// command has no operand - nothing is needed from the
-			// command. if it comes here, it is the showall command....
-			resultsList = new ArrayList<String>(); 
-
-			// Show each element in the list in a different line, following
-			// the specified format: index   --- value
-			// put some heading too....
-
-			FixedLengthCommand fc = (FixedLengthCommand) c;
-
-			String name = fc.getOperand(1); 
-			int listIndex = listsManager.getListIndex(name); 
-			if (listIndex == -1)
-				resultsList.add("No such list: " + name); 
-			else {
-				int lSize = listsManager.getSize(listIndex);
-				if (lSize == 0)
-					resultsList.add("List is currently empty."); 
-				else {
-					resultsList.add("Values in the list are: "); 
-					for (int i=0; i<lSize; i++) 
-						resultsList.add("\tlist[" + i + "] --- " +   
-								listsManager.getElement(listIndex, i)); 		
-				}
-			}
-			return resultsList; 
-		} 
-	}
-	private class AddProcessor implements CommandActionHandler { 
-		   public ArrayList<String> execute(Command c) {  
-
-		      resultsList = new ArrayList<String>(); 
-
-		      FixedLengthCommand fc = (FixedLengthCommand) c;
-
-		      // the following needs to be adapted to named lists and the 
-		      // usage of the ListsManagerObject ......
-
-		      String name = fc.getOperand(1); 
-		      int listIndex = listsManager.getListIndex(name); 
-		      int listSize = listsManager.getSize(listIndex);
-		      if (listIndex == -1)
-		         resultsList.add("No such list: " + name); 
-		      else {
-			   int index = Integer.parseInt(fc.getOperand(2));
-			   int value = Integer.parseInt(fc.getOperand(3));
-			   if (index < 0 || index > listSize)
-				   resultsList.add("No such index: " + index);
-			   else 
-				   listsManager.addElement(listIndex, index, value);
-		      }
-		      return resultsList; 
-		   } 
 		}
+	}
+	
+	//////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////
 
+	
 	/**
 	 * 
 	 * @return
