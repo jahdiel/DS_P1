@@ -31,7 +31,7 @@ to manipulate files inside the virtual disk systems.
 ------------------------------
 Instructions for Eclipse:
 ------------------------------
-+ First unzip the file: P1_4035_802150328_162.zip
++ First unzip the file: P2_4035_802150328_162.zip
 + Open the project in Eclipse.
 + Make sure the Eclipse encoding is set to UTF-8.	
 + Run MySystem.java file inside the theSystem package.
