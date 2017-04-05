@@ -12,21 +12,20 @@ Project Author
 ------------------
 Project Description
 ------------------
-This programming project works with virtual disks systems, 
-with the eventuality of using it in a system that will implement a simple virtual file system. 
-In this phase, it implements the basis of the system, which is the virtual disk in which data is stored in blocks. 
+This programming project works with virtual disks systems. It implements a virtual file system
+which allows the user to manipulate to a certain extent files inside such disks. Commands such as ls and cp are implemented to work on the files created. 
 
 ==============================================
 ------------------
 Program Details:
 ------------------
-+ The project is based on implementing a DiskUnit based on RandomAccessFiles and 
-  arrays of bytes as the virtual representation of the data in memory.
-+ The project consists of three packages:
-	* testers -> which include the scripts for testing the DiskUnit and VirtualDiskBlock classes.
-	* diskUtilities -> which contains the DiskUnit, VirtualDiskBlock and DiskUnitInterface java files.
-	* diskUnitExceptions -> which contains the necessary exceptions for the DiskUnit and VirtualDiskBlock classes.
-+ The classes are based on reading and writing information on to  the RandomAccessFiles simulating a disk system.
++ The project is based on implementing a Virtual file System which allows the user
+to manipulate files inside the virtual disk systems.
++ The main package in the program is diskUtilities:
+	
+	* Which contains the DiskUnit, VirtualDiskBlock, DiskUnitInterface, DirectoryManager, DiskManager, DiskUtils, FileManager, FreeBlockManager and INodeManager java files.
+	
++ The classes are based on reading and writing information on to the RandomAccessFiles simulating a disk system, through the virtual file system and its virtual shell.
 
 ===============================================
 ------------------------------
@@ -35,9 +34,7 @@ Instructions for Eclipse:
 + First unzip the file: P1_4035_802150328_162.zip
 + Open the project in Eclipse.
 + Make sure the Eclipse encoding is set to UTF-8.	
-+ Run DiskUnitTester0.java in order to create the RandomAccessFiles.
-  - The step above will not work if the files already exists.
-+ Run DiskUnitTester1.java (the RandomAccessFiles are need to exist). 
++ Run MySystem.java file inside the theSystem package.
   
 ================================================
 -------------------------------
@@ -47,11 +44,8 @@ Instructions for Terminal
 + Enter the file in which the project is stored.
 + On Windows use the dir command and MacOS or Linux use ls command to verify you are in the correct file.
 + Once inside the project file, compile the java files:
-	>>>javac -d src -sourcepath src src/testers/DiskUnitTester0.java
-or 
-	>>>javac -d src -sourcepath src src/testers/DiskUnitTester1.java
+	>>>javac -d src -sourcepath src src/MySystem/MySystem.java
 	
 + Run the java class files using one of either commands, depending on the situation:
-	>>>java -classpath src testers.DiskUnitTester0
-or
-	>>>java -classpath src testers.DiskUnitTester1
+	>>>java -classpath src theSystem.MySytem
+
