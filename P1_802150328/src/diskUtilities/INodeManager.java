@@ -27,10 +27,9 @@ public class INodeManager {
 	}
 	/**
 	 * Gets the first data block from an i-node using its index.
-	 * @param d
-	 * @param iNodeIndex
-	 * @param blockSize
-	 * @return
+	 * @param d DiskUnit in use.
+	 * @param iNodeIndex Index of the i-node to get data block number.
+	 * @return Returns the data block from the i-node with index iNodeIndex
 	 */
 	public static int getDataBlockFromINode(DiskUnit d, int iNodeIndex) {
 		
@@ -46,10 +45,9 @@ public class INodeManager {
 	
 	/**
 	 * Sets the first data block from an i-node using its index.
-	 * @param d
-	 * @param iNodeIndex
-	 * @param blockSize
-	 * @return
+	 * @param d DiskUnit in use
+	 * @param iNodeIndex Index of the i-node to set data block number.
+	 * @param newDataBlock new data block number to set into i-node.
 	 */
 	public static void setDataBlockToINode(DiskUnit d, int iNodeIndex, int newDataBlock) {
 		
@@ -105,9 +103,9 @@ public class INodeManager {
 	 * @return Index of the next free i-node
 	 */
 	public static int getFreeINode(DiskUnit d) {
-		int freeINodeIdx = d.getFirstFreeINode();
-		int nextFreeINodeIdx = getDataBlockFromINode(d, freeINodeIdx);
-		d.setFirstFreeINode(nextFreeINodeIdx);
+		int freeINodeIdx = d.getFirstFreeINode();  // Get a free i-node index
+		int nextFreeINodeIdx = getDataBlockFromINode(d, freeINodeIdx); 
+		d.setFirstFreeINode(nextFreeINodeIdx); // Set the reference to the next free i-node into the disk (like linked list)
 		
 		return freeINodeIdx;
 	}

@@ -46,10 +46,11 @@ public class FileManager {
 		int rafSize; // Will hold size of the external file (measured in bytes)
 		try {
 			RandomAccessFile rafToRead = new RandomAccessFile(extFile, "rw");
-			rafSize = (int) rafToRead.length();
+			rafSize = (int) rafToRead.length(); // Get size of external file in bytes
 			rafToRead.close();
 			// Create random access file to read data.
-			extFileArrayList = DiskUtils.setExtFileContentToVDBs(extFile, blockSize);
+			// Set the contents of the external file into an ArrayList of VirtualDiskBlocks
+			extFileArrayList = DiskUtils.setExtFileContentToVDBs(extFile, blockSize);  
 			
 		} catch (FileNotFoundException e) {
 			System.err.println("Unable to open external file.");
@@ -159,7 +160,10 @@ public class FileManager {
 		
 	}
 	/**
-	 * List files in directory.
+	 * List the names and sizes of all the files and directories that are part 
+	 * of the current directory. Notice that this command will read the content 
+	 * of the file corresponding to the directory and display the specified 
+	 * information about each file stored in that file. 
 	 */
 	public static void listDir() {
 		DiskUnit disk = DiskManager.mountedDiskUnit;
@@ -170,7 +174,7 @@ public class FileManager {
 		System.out.println("-------------------------------------");
 		// Block Number of the root directory
 		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0);
-		printFilesFromDir(disk, rootBlockNum);
+		printFilesFromDir(disk, rootBlockNum); // Print the filenames with the sizes
 		
 		System.out.println();
 	}
@@ -268,7 +272,7 @@ public class FileManager {
 	}
 	/**
 	 * Reads the file names inside a block and returns the byte position where
-	 * the file name begins in reference to the block.
+	 * the file name begins in reference to the block. If file not found returns null.
 	 * @param vdb
 	 * @return Integer with the byte position of the filename. 
 	 */

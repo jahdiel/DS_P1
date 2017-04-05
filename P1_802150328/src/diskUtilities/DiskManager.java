@@ -139,6 +139,7 @@ public class DiskManager {
 	 * working disk where the commands specified will work on. Each of the following commands require some 
 	 * disk to be the current working disk unit, and they work upon that particular unit. 
 	 * If there's no current working disk unit, then the command just ends with an appropriate error message.
+	 * @param name Name of the disk unit to mount.
 	 */
 	public static void mountDisk(String name) {
 		
@@ -197,7 +198,10 @@ public class DiskManager {
 		FileManager.loadFile(extFile, newFile);
 	}
 	/**
-	 * Lists the files inside the current directory.
+	 * List the names and sizes of all the files and directories that are part 
+	 * of the current directory. Notice that this command will read the content 
+	 * of the file corresponding to the directory and display the specified 
+	 * information about each file stored in that file.
 	 * Prints the filename and its size in bytes.
 	 */
 	public static void listDir() {
@@ -207,7 +211,10 @@ public class DiskManager {
 		}
 		FileManager.listDir();
 	}
-	
+	/**
+	 * Displays the contents of a file in the current directory.
+	 * @param file Name of file to be displayed.
+	 */
 	public static void catFile(String file) {
 		if (!isDiskMounted()) {
 			System.out.println("Cannot display file. No disk is mounted.");

@@ -33,6 +33,7 @@ public class FreeBlockManager {
 	
 	/**
 	 * Obtains the next free block in the DiskUnit.
+	 * Algorithm presented by Prof. Pedro Rivera
 	 * @param d DiskUnit to be used
 	 * @return Returns Block Number of free Block
 	 */
@@ -62,6 +63,7 @@ public class FreeBlockManager {
 	
 	/**
 	 * Inserts a freed block into the free block structure.
+	 * Algorithm presented by Prof. Pedro Rivera
 	 * @param d DiskUnit
 	 * @param bn Index of the freed block.
 	 */
@@ -89,9 +91,9 @@ public class FreeBlockManager {
 	/**
 	 * Sets an integer in the provided index inside a free data block.
 	 * Equivalent to block[index] = value;
-	 * @param blockNum
-	 * @param index
-	 * @param value
+	 * @param blockNum Number of data block to write into.
+	 * @param index Index in the block to write to
+	 * @param value New integer value to write
 	 */
 	public static void setIntInsideBlock(DiskUnit d, int blockNum, int index, int value) {
 		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
@@ -102,9 +104,9 @@ public class FreeBlockManager {
 	/**
 	 * Gets an integer from the provided index inside a free data block.
 	 * Equivalent to value = block[index];
-	 * @param blockNum
-	 * @param index
-	 * @param value
+	 * @param d DiskUnit in use.
+	 * @param blockNum Number of data block to get integer from.
+	 * @param index Index in the block where integer's byte begin.
 	 */
 	public static int getIntInsideBlock(DiskUnit d, int blockNum, int index) {
 		VirtualDiskBlock vdb = DiskUtils.copyBlockToVDB(d, blockNum);
@@ -115,10 +117,9 @@ public class FreeBlockManager {
 		return intInsideBlock;
 	}
 	
-	
 	/**
-	 * 
-	 * @param disk
+	 * Initializes the free block structure. 
+	 * @param disk DiskUnit in use
 	 */
 	public static void initializeFreeBlocks(DiskUnit disk) {
 		int firstFreeBlock = disk.getFirstDataBlock();

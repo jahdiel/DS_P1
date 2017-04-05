@@ -133,16 +133,17 @@ public class DiskUtils {
 			int numOfBlocks =  (int) Math.ceil(fileToReadSize / usableBytes); // Amount of blocks needed to copy fileToRead.		
 			int byteCounter = 0; // Counts the bytes read
 			
+			// Store the contents of the random access file into VDBs
 			fileToRead.seek(0);
-			for (int i=0; i < numOfBlocks; i++) {
+			for (int i=0; i < numOfBlocks; i++) { // Iterate through number of blocks
 				VirtualDiskBlock vdb = new VirtualDiskBlock(blockSize);
 				for (int j=0; j < usableBytes; j++) {
-					if (byteCounter == (int) fileToReadSize)
+					if (byteCounter == (int) fileToReadSize) // Verify read the total bytes in the RAF
 						break;
-					vdb.setElement(j, fileToRead.readByte());	
-					byteCounter++;
+					vdb.setElement(j, fileToRead.readByte());	// Set the read byte into the VDB
+					byteCounter++;  // Increase the counter after reading a byte from RAF
 				}
-				vdbArray.add(vdb);
+				vdbArray.add(vdb); // Add the block to the ArrayList
 			}
 			fileToRead.close(); // Close RAF
 			return vdbArray;
@@ -177,18 +178,22 @@ public class DiskUtils {
 		return fileContent;
 		
 	}
-	
+	/**
+	 * Obtains an ArrayList of VirtualDiskBlocks, copies its content as a single string
+	 * and prints the file string.
+	 * @param vdBlocks ArrayList of VirtualDiskBlocks
+	 */
 	public static void printContentOfVDBlocks(ArrayList<VirtualDiskBlock> vdBlocks) {
 		
-		String fileString = "";
+		String fileString = ""; // Initial file string
 		
-		for (VirtualDiskBlock block : vdBlocks) {
+		for (VirtualDiskBlock block : vdBlocks) { 
 			
-			char[] blockCharArray = new char[block.getCapacity()-4];
-			for (int i=0; i<block.getCapacity()-4; i++) {
+			char[] blockCharArray = new char[block.getCapacity()-4]; // Copy bytes in the block into a char array
+			for (int i=0; i<block.getCapacity()-4; i++) {    // Get bytes up to the blocksize - 4, the next data block index is stored there.
 				blockCharArray[i] = getCharFromBlock(block, i);
 			}
-			fileString += new String(blockCharArray);
+			fileString += new String(blockCharArray); // Concatenate the block string into the file string
 		}
 		
 		System.out.println(fileString); // Print the contents of the file
