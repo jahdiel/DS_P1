@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import diskUnitExceptions.ExistingDiskException;
+import diskUnitExceptions.FullDiskException;
 import diskUnitExceptions.InvalidParameterException;
 import diskUnitExceptions.NonExistingDiskException;
 
@@ -38,10 +39,13 @@ public class DiskManager {
 		//TODO: create DiskNames text file if doesn't exist
 		
 		// Verifying DiskUnit folder exists and add Unit to DiskNames text file
-		DirectoryManager.createDiskDirectory();
-		DirectoryManager.addUnitToDiskNames(name);
-		
-		DiskUnit.createDiskUnit(name, capacity, blockSize);
+		DirectoryManager.createDiskDirectory();	
+		try {
+			DiskUnit.createDiskUnit(name, capacity, blockSize);
+			DirectoryManager.addUnitToDiskNames(name);
+		} catch (ExistingDiskException e) {
+			throw new ExistingDiskException();
+		}
 		// Mount the disk unit in order to create its root directory.
 		DiskUnit d = DiskUnit.mount(name);
 		
@@ -195,7 +199,11 @@ public class DiskManager {
 			System.out.println("Cannot load file. No disk is mounted.");
 			return;
 		}
-		FileManager.loadFile(extFile, newFile);
+		try {
+			FileManager.loadFile(extFile, newFile);
+		} catch (FullDiskException e) {
+			return;
+		}
 	}
 	/**
 	 * List the names and sizes of all the files and directories that are part 
@@ -234,24 +242,15 @@ public class DiskManager {
 			System.out.println("Cannot copy file. No disk is mounted.");
 			return;
 		}
-		FileManager.copyFile(inputFile, file);
-		
+		try {
+			FileManager.copyFile(inputFile, file);
+		} catch (FullDiskException e) {
+			return;
+		}
+	
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 }

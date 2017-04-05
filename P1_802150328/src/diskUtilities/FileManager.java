@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
+import diskUnitExceptions.FullDiskException;
+
 public class FileManager {
 
 	/**
@@ -23,7 +25,7 @@ public class FileManager {
 	 * @param extFile Name of the file to read
 	 * @param file Name of the new file
 	 */
-	public static void loadFile(String extFile, String file) {
+	public static void loadFile(String extFile, String file) throws FullDiskException{
 		
 		//extFile += ".txt"; 
 		File fileToRead = new File(extFile); // file to read from
@@ -64,34 +66,38 @@ public class FileManager {
 		int rootBlockNum = INodeManager.getDataBlockFromINode(disk, 0);
 		// Verify if File already exists.
 		ArrayList<Integer> foundFile = findFileInDir(disk, file, rootBlockNum);
-		 
-		if (foundFile != null) { // If found the file erases the foundFile and creates it with new content.
-			VirtualDiskBlock foundFileBlock = DiskUtils.copyBlockToVDB(disk, foundFile.get(0));
-			int fileBytePos = foundFile.get(1);
-			// Get iNode reference to that file 
-			int iNodeRef = DiskUtils.getIntFromBlock(foundFileBlock, fileBytePos+20); // Reads the integer right after the filename, which is the iNode ref
-			int fileDataBlock = INodeManager.getDataBlockFromINode(disk, iNodeRef);  // Data block from the i-node
-			// Set size in of file into its i-node
-			INodeManager.setSizeIntoINode(disk, iNodeRef, rafSize);
-			// Delete file from disk
-			deleteFileFromDisk(disk, fileDataBlock);
-			// Write new file in place of the older one
-			writeNewFileIntoDisk(disk, fileDataBlock, extFileArrayList);
-			
-		}
-		else { // Create the new file.
-			// Write new file into root directory
-			int iNodeRef = writeNewFileIntoDirectory(disk, file, rootBlockNum); // Returns the iNode reference.
-			// Enter the iNode and assign a free block
-			// Get free block number
-			int freeBN = FreeBlockManager.getFreeBN(disk);
-			// Set data block in i-node to the free block 
-			INodeManager.setDataBlockToINode(disk, iNodeRef, freeBN);
-			// Set size in of file into its i-node
-			INodeManager.setSizeIntoINode(disk,iNodeRef, rafSize);
-			// Write file into the free block
-			writeNewFileIntoDisk(disk, freeBN, extFileArrayList);
-		}
+		try {
+			if (foundFile != null) { // If found the file erases the foundFile and creates it with new content.
+				VirtualDiskBlock foundFileBlock = DiskUtils.copyBlockToVDB(disk, foundFile.get(0));
+				int fileBytePos = foundFile.get(1);
+				// Get iNode reference to that file 
+				int iNodeRef = DiskUtils.getIntFromBlock(foundFileBlock, fileBytePos+20); // Reads the integer right after the filename, which is the iNode ref
+				int fileDataBlock = INodeManager.getDataBlockFromINode(disk, iNodeRef);  // Data block from the i-node
+				// Set size in of file into its i-node
+				INodeManager.setSizeIntoINode(disk, iNodeRef, rafSize);
+				// Delete file from disk
+				deleteFileFromDisk(disk, fileDataBlock);
+				// Write new file in place of the older one
+				writeNewFileIntoDisk(disk, fileDataBlock, extFileArrayList);
+
+			}
+			else { // Create the new file.
+				// Write new file into root directory
+
+				int iNodeRef = writeNewFileIntoDirectory(disk, file, rootBlockNum); // Returns the iNode reference.
+				// Enter the iNode and assign a free block
+				// Get free block number
+				int freeBN = FreeBlockManager.getFreeBN(disk);
+				// Set data block in i-node to the free block 
+				INodeManager.setDataBlockToINode(disk, iNodeRef, freeBN);
+				// Set size in of file into its i-node
+				INodeManager.setSizeIntoINode(disk,iNodeRef, rafSize);
+				// Write file into the free block
+				writeNewFileIntoDisk(disk, freeBN, extFileArrayList);
+			}
+		} catch (FullDiskException e) {
+			throw new FullDiskException(e);
+		}	
 		
 	}
 	/**
@@ -101,7 +107,7 @@ public class FileManager {
 	 * @param inputFile Internal file to copy from
 	 * @param file Internal file to copy content into
 	 */
-	public static void copyFile(String inputFile, String file) {
+	public static void copyFile(String inputFile, String file) throws FullDiskException {
 		
 		// Format file strings to fit 20 bytes
 		inputFile = DiskUtils.formatFileName(inputFile);
@@ -129,33 +135,38 @@ public class FileManager {
 		
 		// Verify if File already exists.
 		ArrayList<Integer> foundFile = findFileInDir(disk, file, rootBlockNum);
+		
+		try {
+			if (foundFile != null) { // If found the file erases the foundFile and creates it with new content.
+				VirtualDiskBlock foundFileBlock = DiskUtils.copyBlockToVDB(disk, foundFile.get(0));
+				int fileBytePos = foundFile.get(1);
+				// Get iNode reference to that file 
+				int iNodeRef = DiskUtils.getIntFromBlock(foundFileBlock, fileBytePos+20); // Reads the integer right after the filename, which is the iNode ref
+				int fileDataBlock = INodeManager.getDataBlockFromINode(disk, iNodeRef);  // Data block from the i-node
+				// Set size of file into its i-node
+				INodeManager.setSizeIntoINode(disk, iNodeRef, inputFileSize);
+				// Delete file from disk
+				deleteFileFromDisk(disk, fileDataBlock);
+				// Write new file in place of the older one
+				writeNewFileIntoDisk(disk, fileDataBlock, content);
 
-		if (foundFile != null) { // If found the file erases the foundFile and creates it with new content.
-			VirtualDiskBlock foundFileBlock = DiskUtils.copyBlockToVDB(disk, foundFile.get(0));
-			int fileBytePos = foundFile.get(1);
-			// Get iNode reference to that file 
-			int iNodeRef = DiskUtils.getIntFromBlock(foundFileBlock, fileBytePos+20); // Reads the integer right after the filename, which is the iNode ref
-			int fileDataBlock = INodeManager.getDataBlockFromINode(disk, iNodeRef);  // Data block from the i-node
-			// Set size of file into its i-node
-			INodeManager.setSizeIntoINode(disk, iNodeRef, inputFileSize);
-			// Delete file from disk
-			deleteFileFromDisk(disk, fileDataBlock);
-			// Write new file in place of the older one
-			writeNewFileIntoDisk(disk, fileDataBlock, content);
+			}
+			else { // Create the new file.
+				// Write new file into root directory
 
-		}
-		else { // Create the new file.
-			// Write new file into root directory
-			int iNodeRef = writeNewFileIntoDirectory(disk, file, rootBlockNum); // Returns the iNode reference.
-			// Enter the iNode and assign a free block
-			// Get free block number
-			int freeBN = FreeBlockManager.getFreeBN(disk);
-			// Set data block in i-node to the free block 
-			INodeManager.setDataBlockToINode(disk, iNodeRef, freeBN);
-			// Set size in of file into its i-node
-			INodeManager.setSizeIntoINode(disk,iNodeRef, inputFileSize);
-			// Write file into the free block
-			writeNewFileIntoDisk(disk, freeBN, content);
+				int iNodeRef = writeNewFileIntoDirectory(disk, file, rootBlockNum); // Returns the iNode reference.
+				// Enter the iNode and assign a free block
+				// Get free block number
+				int freeBN = FreeBlockManager.getFreeBN(disk);
+				// Set data block in i-node to the free block 
+				INodeManager.setDataBlockToINode(disk, iNodeRef, freeBN);
+				// Set size in of file into its i-node
+				INodeManager.setSizeIntoINode(disk,iNodeRef, inputFileSize);
+				// Write file into the free block
+				writeNewFileIntoDisk(disk, freeBN, content);
+			} 
+		} catch (FullDiskException e) {
+			throw new FullDiskException(e);
 		}
 		
 	}
@@ -217,7 +228,7 @@ public class FileManager {
 	 * @param blockSize Bytes per block
 	 * @return ArrayList with block number in first index and free byte position in second index.
 	 */
-	public static ArrayList<Integer> getFreePosInDirectory(DiskUnit d, int firstDirBlockNum, int blockSize) {
+	public static ArrayList<Integer> getFreePosInDirectory(DiskUnit d, int firstDirBlockNum, int blockSize) throws FullDiskException {
 		
 		int usableBytes = blockSize - 4;
 		int filesPerBlock = usableBytes / 24;
@@ -236,11 +247,16 @@ public class FileManager {
 			}
 		}
 		if (freeDirArray.isEmpty()) {
-			int nextFreeBlock = FreeBlockManager.getFreeBN(d);
-			DiskUtils.copyIntToBlock(lastDataBlock, usableBytes, nextFreeBlock); // Copy new data block into last 4 bytes
-			d.write(blockNum, lastDataBlock); 	// Write the next block number into the block on the disk
-			freeDirArray.add(nextFreeBlock); 	// Block number to write into
-			freeDirArray.add(0);   // Byte position to use 
+			try{
+				int nextFreeBlock = FreeBlockManager.getFreeBN(d);
+				DiskUtils.copyIntToBlock(lastDataBlock, usableBytes, nextFreeBlock); // Copy new data block into last 4 bytes
+				d.write(blockNum, lastDataBlock); 	// Write the next block number into the block on the disk
+				freeDirArray.add(nextFreeBlock); 	// Block number to write into
+				freeDirArray.add(0);   // Byte position to use
+			} catch (FullDiskException e) {
+				System.out.println(e.getMessage());
+				throw new FullDiskException(e);
+			}
 		}
 			
 		return freeDirArray;
@@ -366,10 +382,11 @@ public class FileManager {
 	 * @param blockNum Number of the block to write in.
 	 * @param blockSize Bytes per block.
 	 * @throws IllegalArgumentException Thrown if filename length not 20 characters long.
+	 * @throws FullDiskException The disk is full.
 	 * @return Returns reference to the i-node of the new file.
 	 */
 	public static int  writeNewFileIntoDirectory(DiskUnit d, String file, int blockNum) 
-			throws IllegalArgumentException {
+			throws IllegalArgumentException, FullDiskException {
 		
 		// Blocksize of the blocks
 		int blockSize = d.getBlockSize();
@@ -387,7 +404,14 @@ public class FileManager {
 		
 		// Write file name inside root and assign a free i-node to reference it.
 		// Obtain free i-node index
-		int iNodeRef = INodeManager.getFreeINode(d);
+		int iNodeRef;
+		try {
+			iNodeRef = INodeManager.getFreeINode(d);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			throw new FullDiskException();  // Could not get more i-node
+		}
+
 		// Write file name and node index into root;
 		int newFileBlockNum = newFileInRoot.get(0);
 		int newFileBytePos = newFileInRoot.get(1);
@@ -431,32 +455,38 @@ public class FileManager {
 	 * @param vdbArray
 	 */
 	private static void writeNewFileIntoDisk(DiskUnit d, int firstFreeBlock, ArrayList<VirtualDiskBlock> vdbArray) {
-		
-		if (vdbArray.size() < 1) {
-			System.out.println("No content retrieved from the external file.");
-			return;
-		}
-		VirtualDiskBlock vdb = vdbArray.get(0);  // Get the VirtualDiskBlock from the ArrayList
-		int nextFreeBlock;  // Holds the next free block to use
-		if (vdbArray.size() == 1)
-			nextFreeBlock = 0;
-		else
-			nextFreeBlock = FreeBlockManager.getFreeBN(d); // Look for a free block
-		DiskUtils.copyIntToBlock(vdb, vdb.getCapacity()-4, nextFreeBlock);  // Write free block number into last 4-bytes of block
-		d.write(firstFreeBlock, vdb);   // Write virtual disk block into disk 
-		
-		for (int i=1; i<vdbArray.size(); i++) {
-			int freeBlock = nextFreeBlock;  // Save the next block, in order to write in that block
-			vdb = vdbArray.get(i);
-			if (i == vdbArray.size()-1)
+		try {
+			if (vdbArray.size() < 1) {
+				System.out.println("No content retrieved from the external file.");
+				return;
+			}
+			VirtualDiskBlock vdb = vdbArray.get(0);  // Get the VirtualDiskBlock from the ArrayList
+			int nextFreeBlock;  // Holds the next free block to use
+			if (vdbArray.size() == 1)
 				nextFreeBlock = 0;
 			else
-				nextFreeBlock = FreeBlockManager.getFreeBN(d);  // Look for a free block
+				nextFreeBlock = FreeBlockManager.getFreeBN(d); // Look for a free block
 			DiskUtils.copyIntToBlock(vdb, vdb.getCapacity()-4, nextFreeBlock);  // Write free block number into last 4-bytes of block
-			d.write(freeBlock, vdb);  // Write virtual disk block into disk 
+			d.write(firstFreeBlock, vdb);   // Write virtual disk block into disk 
+
+			for (int i=1; i<vdbArray.size(); i++) {
+				int freeBlock = nextFreeBlock;  // Save the next block, in order to write in that block
+				vdb = vdbArray.get(i);
+				if (i == vdbArray.size()-1)
+					nextFreeBlock = 0;
+				else
+					nextFreeBlock = FreeBlockManager.getFreeBN(d);  // Look for a free block
+				DiskUtils.copyIntToBlock(vdb, vdb.getCapacity()-4, nextFreeBlock);  // Write free block number into last 4-bytes of block
+				d.write(freeBlock, vdb);  // Write virtual disk block into disk 
+			}
+		} catch (FullDiskException e) {
+				System.out.println(e.getMessage());
+				throw new FullDiskException();
 		}
 		
-	}
+		
+
+		}
 	/**
 	 * Deletes a file from the disk by wiping its data blocks.
 	 * @param d DiskUnit in use

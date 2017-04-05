@@ -2,6 +2,8 @@ package theSystem;
 
 import java.util.ArrayList;
 
+import diskUnitExceptions.ExistingDiskException;
+import diskUnitExceptions.FullDiskException;
 import diskUnitExceptions.InvalidParameterException;
 import operandHandlers.OperandValidatorUtils;
 import lists.DLDHDTList;
@@ -138,6 +140,8 @@ public class SystemCommandsProcessor extends CommandProcessor {
 					resultsList.add("Invalid number: Capacity needs to be greater than 0.");
 				else
 					resultsList.add("Capacity and Blocksize need to be power of 2.");
+			} catch (ExistingDiskException e) {
+				System.out.println("Disk exist with that name already.");
 			}
 			return resultsList; 
 		}

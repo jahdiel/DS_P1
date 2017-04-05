@@ -102,10 +102,12 @@ public class INodeManager {
 	 * Gets the next free i-node.
 	 * @return Index of the next free i-node
 	 */
-	public static int getFreeINode(DiskUnit d) {
+	public static int getFreeINode(DiskUnit d) throws Exception {
 		int freeINodeIdx = d.getFirstFreeINode();  // Get a free i-node index
+		if (freeINodeIdx == 0)
+			throw new Exception("No more I-Nodes available");
 		int nextFreeINodeIdx = getDataBlockFromINode(d, freeINodeIdx); 
-		d.setFirstFreeINode(nextFreeINodeIdx); // Set the reference to the next free i-node into the disk (like linked list)
+		d.setFirstFreeINode(nextFreeINodeIdx); // Set the reference to the next free i-node into the disk (like linked list)	
 		
 		return freeINodeIdx;
 	}
