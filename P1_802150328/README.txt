@@ -13,7 +13,7 @@ Project Author
 Project Description
 ------------------
 This programming project works with virtual disks systems. It implements a virtual file system
-which allows the user to manipulate to a certain extent files inside such disks. Commands such as ls and cp are implemented to work on the files created. 
+which allows the user to manipulate to a certain extent files inside such disks. Commands such as mkdir and rm are implemented to work on the files created. 
 
 ==============================================
 ------------------
@@ -31,7 +31,7 @@ to manipulate files inside the virtual disk systems.
 ------------------------------
 Instructions for Eclipse:
 ------------------------------
-+ First unzip the file: P2_4035_802150328_162.zip
++ First unzip the file: P3_4035_802150328_162.zip
 + Open the project in Eclipse.
 + Make sure the Eclipse encoding is set to UTF-8.	
 + Run MySystem.java file inside the theSystem package.
